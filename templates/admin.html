@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G&CRestaurant · Panel administrador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="/" aria-label="Volver a la web">
+      <span class="brand__logo">G&C</span>
+      <span class="brand__text">Restaurant<small>panel administrador</small></span>
+    </a>
+    <div class="header__actions" style="margin-left:auto">
+      <a class="btn btn--ghost" href="/cliente" style="font-size:.85rem">← Ver web pública</a>
+      <button class="btn btn--primary btn--cta-s" id="btnLogout" type="button" hidden>Salir 🔒</button>
+    </div>
+  </div>
+  <nav class="container admin-nav" id="adminNav" hidden aria-label="Secciones del panel">
+    <button class="admin-nav__btn activo" data-vista="resumen" type="button">📊 Resumen</button>
+    <button class="admin-nav__btn" data-vista="promociones" type="button">🍽️ Promociones</button>
+    <button class="admin-nav__btn" data-vista="especial" type="button">🍳 Especial</button>
+    <button class="admin-nav__btn" data-vista="inventario" type="button">📦 Inventario</button>
+    <button class="admin-nav__btn" data-vista="anuncios" type="button">🎨 Anuncios</button>
+    <button class="admin-nav__btn" data-vista="avisos" type="button">⚠️ Avisos</button>
+  </nav>
+</header>
+
+<main class="container" style="padding-block:40px">
+
+  <!-- LOGIN -->
+  <section class="login-card" id="loginBox" hidden>
+    <div class="login-card__emoji">🔐</div>
+    <h2>Acceso restringido</h2>
+    <p class="section__sub">Solo el administrador del restaurante puede ver el inventario, las recetas y los avisos.</p>
+    <form id="formLogin" class="login-card__form">
+      <input class="input" id="inUsuario" type="text" placeholder="Usuario" autocomplete="username" required>
+      <input class="input" id="inPassword" type="password" placeholder="Contraseña" autocomplete="current-password" required>
+      <button class="btn btn--primary btn--block" type="submit">Entrar al panel</button>
+      <p class="drawer__note" id="loginMsg" style="color:var(--rojo);margin-top:10px" hidden></p>
+    </form>
+  </section>
+
+  <!-- PANEL -->
+  <section id="dashboard" hidden aria-live="polite">
+
+    <div class="admin-vista activa" data-vista="resumen">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Inventario · Recetas · Avisos</p>
+        <h2 class="section__title">Panel del restaurante</h2>
+      </div>
+      <div class="kpis" id="kpis">
+        <div class="kpi"><b id="kPromos">–</b><span>Promociones</span></div>
+        <div class="kpi"><b id="kInsumos">–</b><span>Insumos</span></div>
+        <div class="kpi kpi--crit"><b id="kCriticos">–</b><span>Por vencer</span></div>
+        <div class="kpi"><b id="kValor">–</b><span>Valor inventario</span></div>
+      </div>
+      <div class="admin-sec" id="secAlertas">
+        <h3 class="admin-sec__titulo">⚠️ Avisos de vencimiento</h3>
+        <p class="section__sub">Insumos críticos en los próximos <span id="ventanaAlertas">5</span> días.</p>
+        <div class="grid grid--alertas" id="gridAlertas"></div>
+      </div>
+    </div>
+
+    <div class="admin-vista" data-vista="promociones">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Recetas de cocina</p>
+        <h2 class="section__title">Promociones</h2>
+      </div>
+      <div class="admin-sec" id="secRecetas">
+        <h3 class="admin-sec__titulo">📖 Recetas de cocina (ingredientes de cada promo)</h3>
+        <div class="inv-filtro">
+          <input class="inv-buscar" id="recBuscar" type="search"
+                 placeholder="🔍  Buscar plato o ingrediente…" autocomplete="off" aria-label="Buscar plato o ingrediente">
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Plato</th><th>Descuento</th><th>Receta (insumos)</th><th>Visibilidad</th></tr>
+            </thead>
+            <tbody id="tbodyRecetas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-vista" data-vista="especial">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Chef Zero-Waste</p>
+        <h2 class="section__title">Especial del Día</h2>
+      </div>
+      <div class="admin-sec" id="secEspecial">
+        <h3 class="admin-sec__titulo">🍳 Recetas del día</h3>
+        <div class="grid grid--especial" id="gridEspecial"></div>
+      </div>
+    </div>
+
+    <div class="admin-vista" data-vista="inventario">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Stock y caducidades</p>
+        <h2 class="section__title">Inventario fresco</h2>
+      </div>
+      <div class="admin-sec" id="secInventario">
+        <h3 class="admin-sec__titulo">📦 Detalle de insumos</h3>
+        <p class="section__sub">Las cantidades se actualizan solas con cada pedido que consume ingredientes. La tabla se refresca en vivo cada 5 segundos.</p>
+        <div class="inv-filtro">
+          <input class="inv-buscar" id="invBuscar" type="search"
+                 placeholder="🔍  Buscar por nombre de insumo…" autocomplete="off" aria-label="Buscar insumo por nombre">
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Insumo</th><th>Categoría</th><th class="num">Cantidad</th>
+                <th class="num">Costo S/</th><th class="num">Valor S/</th>
+                <th>Caducidad</th><th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyInventario"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-vista" data-vista="anuncios">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Promos y banners en vivo</p>
+        <h2 class="section__title">Gestión de anuncios</h2>
+      </div>
+      <div class="admin-sec" id="secBanners">
+        <h3 class="admin-sec__titulo">🎨 Anuncios promocionales</h3>
+        <p class="section__sub">Banners de los platillos que se publican en el sitio público.</p>
+        <div class="grid grid--banners" id="gridBanners"></div>
+      </div>
+      <div class="admin-sec" id="secAnuncios">
+        <h3 class="admin-sec__titulo">🗑️ Control de platillos</h3>
+        <p class="section__sub">
+          Usa “Ocultar” para retirar una promoción del sitio público al instante.
+          Todo se deshace con “Mostrar”.
+        </p>
+        <div class="grid grid--banners" id="gridAnuncios"></div>
+      </div>
+    </div>
+
+    <div class="admin-vista" data-vista="avisos">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Insumos por vencer</p>
+        <h2 class="section__title">Avisos de inventario</h2>
+      </div>
+      <div class="admin-sec" id="secAvisos">
+        <h3 class="admin-sec__titulo">⚠️ Avisos de vencimiento</h3>
+        <p class="section__sub">Cada aviso corresponde a un insumo del inventario próximo a caducar.</p>
+        <div class="grid grid--banners" id="gridAvisos"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modalEspecial" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal__card">
+    <button class="modal__close" id="btnCerrarModal" type="button" aria-label="Cerrar">×</button>
+    <div id="modalContenido"></div>
+  </div>
+</div>
+<div class="overlay" id="overlay" hidden></div>
+
+<script src="{{ url_for('static', filename='js/flyer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

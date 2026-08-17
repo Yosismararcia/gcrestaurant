@@ -1,0 +1,74 @@
+/* ============================================================
+   G&CRestaurant · estilos del panel administrador
+   ============================================================ */
+[hidden] { display: none !important; }
+
+/* Barra superior de vistas del panel */
+.admin-nav {
+  display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 0;
+  border-top: 1px solid rgba(154, 52, 18, .12);
+}
+.admin-nav__btn {
+  border: 1px solid var(--fondo-crema); background: var(--blanco);
+  border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: .85rem;
+  color: var(--tinta-suave); cursor: pointer; transition: .2s;
+}
+.admin-nav__btn:hover { background: var(--fondo-crema); color: var(--primario-oscuro); }
+.admin-nav__btn.activo { background: var(--primario); color: #fff; border-color: var(--primario); }
+
+/* Vistas: una pantalla a la vez */
+.admin-vista { display: none; }
+.admin-vista.activa { display: block; animation: subir .4s ease both; }
+
+.login-card {
+  max-width: 420px; margin: 0 auto;
+  background: var(--blanco); border-radius: var(--radio);
+  padding: 34px; text-align: center; box-shadow: var(--sombra);
+  border: 1px solid var(--fondo-crema);
+}
+.login-card__emoji { font-size: 2.6rem; }
+.login-card h2 { font-family: "Fraunces", serif; font-weight: 900; font-size: 1.6rem; margin-block: 8px; }
+.login-card__form { display: grid; gap: 12px; margin-top: 20px; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 34px; }
+.kpi {
+  background: var(--blanco); border: 1px solid var(--fondo-crema);
+  border-radius: 16px; padding: 18px; box-shadow: 0 10px 24px -16px rgba(154, 52, 18, .4);
+}
+.kpi b { display: block; font-family: "Fraunces", serif; font-weight: 900; font-size: 1.5rem; color: var(--primario-oscuro); }
+.kpi span { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--tinta-suave); }
+.kpi--crit b { color: var(--rojo); }
+
+.admin-sec { margin-top: 44px; }
+.admin-sec__titulo { font-family: "Fraunces", serif; font-weight: 900; font-size: 1.3rem; margin-bottom: 14px; }
+.admin-sec__titulo::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--primario); margin-right: 8px; }
+
+/* Buscador del inventario */
+.inv-filtro { margin-bottom: 14px; max-width: 360px; }
+.inv-buscar {
+  width: 100%; padding: 10px 14px; font-size: .92rem;
+  border: 1px solid var(--fondo-crema); border-radius: 999px;
+  background: var(--blanco); color: var(--tinta); outline: none; transition: .2s;
+}
+.inv-buscar:focus { border-color: var(--primario); box-shadow: 0 0 0 3px rgba(234, 88, 12, .15); }
+.inv-buscar::placeholder { color: var(--tinta-suave); opacity: .8; }
+.inv-buscar::-webkit-search-cancel-button { cursor: pointer; }
+
+.card--alerta { border-left: 6px solid var(--rojo); }
+.card__urgencia { font-weight: 800; color: var(--rojo); font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; }
+.reveal { animation: subir .5s ease both; }
+@keyframes subir { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
+
+/* Botón "✕" para retirar anuncios al instante */
+.admin-sec .card { position: relative; }
+.card__x {
+  position: absolute; top: 10px; right: 10px; z-index: 5;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 0; cursor: pointer; font-weight: 800; font-size: .9rem; line-height: 1;
+  color: var(--tinta-suave); background: rgba(255,255,255,.9);
+  box-shadow: 0 4px 10px -4px rgba(0,0,0,.3); transition: .2s;
+}
+.card__x:hover { background: var(--rojo); color: #fff; transform: scale(1.1); }
+
+body { min-height: 100vh; }

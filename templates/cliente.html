@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="G&CRestaurant: Generador de Promociones, Marketing Express y Control de Mermas e Inventario Fresco.">
+  <title>G&amp;CRestaurant · Promociones &amp; Inventario Fresco</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="/" data-vista="inicio" aria-label="G&CRestaurant inicio">
+      <span class="brand__logo">G&C</span>
+      <span class="brand__text">Restaurant<small>foodtech · zero waste</small></span>
+    </a>
+    <nav class="nav" aria-label="Principal">
+      <a href="#promociones" data-nav data-vista="promociones">Promociones</a>
+      <a href="#especial" data-nav data-vista="especial">Especial del Día</a>
+      <a href="#banners" data-nav data-vista="banners">Banners</a>
+    </nav>
+    <div class="header__actions">
+      <button class="btn btn--cart" id="btnCarrito" type="button" aria-label="Abrir pedido">
+        <span class="cart-icon">🧺</span>
+        <span class="cart-badge" id="cartBadge">0</span>
+        <span class="cart-label">Pedido</span>
+      </button>
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="inicio">
+
+  <section class="hero vista activa" id="inicio" data-vista="inicio">
+    <div class="hero__blob hero__blob--one"></div>
+    <div class="hero__blob hero__blob--two"></div>
+    <div class="container hero__inner">
+      <div class="hero__content">
+        <span class="badge badge--hero">🔥 Promociones &amp; Marketing Express</span>
+        <h1 class="hero__title">Sabores que no se pierden,<br><em>promos que sí se venden.</em></h1>
+        <p class="hero__sub">
+          G&amp;CRestaurant convierte tu <strong>inventario fresco</strong> en <strong>ofertas irresistibles</strong> en segundos,
+          y transforma los insumos por vencer en un <strong>Especial del Día</strong>. Menos mermas, más margen.
+        </p>
+        <div class="hero__cta">
+          <a href="#promociones" data-vista="promociones" class="btn btn--primary">Ver promociones</a>
+          <a href="#especial" data-vista="especial" class="btn btn--ghost">Ver el Especial del Día</a>
+        </div>
+        <div class="hero__stats" id="heroStats" aria-live="polite">
+          <div class="stat"><span class="stat__num" id="statPromos">–</span><span class="stat__label">Promociones</span></div>
+          <div class="stat"><span class="stat__num" id="statBanners">–</span><span class="stat__label">Banners</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section vista" id="promociones" data-vista="promociones">
+    <div class="container">
+      <div class="section__head">
+        <p class="kicker">Listo para pedir</p>
+        <h2 class="section__title">Promociones activas</h2>
+        <p class="section__sub">Elige tus platillos favoritos con descuento y agrégalos al pedido.</p>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="buscador" class="input" placeholder="Buscar platillo, categoría o ingrediente…" aria-label="Buscar promociones">
+        <select id="filtroCategoria" class="select" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+        </select>
+      </div>
+      <div class="grid grid--promos" id="gridPromos" aria-live="polite"></div>
+      <p class="empty" id="emptyPromos" hidden>No hay platillos que coincidan con tu búsqueda.</p>
+    </div>
+  </section>
+
+  <section class="section section--tinta vista" id="especial" data-vista="especial">
+    <div class="container">
+      <div class="especial">
+        <div class="especial__badge">⚡ Rescatamos lo más fresco</div>
+        <div>
+          <p class="kicker">El plato del día</p>
+          <h2 class="section__title section__title--claro">Especial del Día</h2>
+          <p class="section__sub section__sub--claro" id="especialResumen">
+            Nuestro chef convierte lo más fresco en un plato único. Disponible hasta agotar stock. 🥬→🍽️
+          </p>
+        </div>
+        <div class="grid grid--especial" id="gridEspecial" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section vista" id="banners" data-vista="banners">
+    <div class="container">
+      <div class="section__head">
+        <p class="kicker">Promos listas para compartir</p>
+        <h2 class="section__title">Galería de banners promocionales</h2>
+        <p class="section__sub">Nuestras mejores ofertas, listas para redes sociales. Nuevos banners cada semana.</p>
+      </div>
+      <div class="mt-0 grid grid--banners" id="gridBanners" aria-live="polite"></div>
+    </div>
+  </section>
+
+  </main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>
+      <span class="brand__logo">G&C</span>
+      <p class="footer__text">Promociones, marketing y cero mermas.</p>
+    </div>
+    <div class="footer__meta">
+      <p>Hecho con OpenCode · Flask · Vercel</p>
+      <p>Promociones, Especial del Día y banners para nuestros clientes.</p>
+    </div>
+  </div>
+</footer>
+
+<aside class="drawer" id="drawerCarrito" aria-hidden="true">
+  <div class="drawer__head">
+    <h3>Tu pedido</h3>
+    <button class="drawer__close" id="btnCerrarCarrito" type="button" aria-label="Cerrar">×</button>
+  </div>
+  <div class="drawer__body" id="drawerBody">
+    <p class="empty">Aún no elegiste platillos. Toca <b>+</b> en una promoción. 🍽️</p>
+  </div>
+  <div class="drawer__foot">
+    <div class="totales" id="totalesPedido">
+      <div class="total"><span>Total</span><b id="totalPedido">S/ 0.00</b></div>
+    </div>
+    <button class="btn btn--primary btn--block" id="btnConfirmarPedido" type="button" disabled>Confirmar & descontar inventario ✔️</button>
+    <p class="drawer__note" id="notaPedido"></p>
+  </div>
+</aside>
+<div class="overlay" id="overlay" hidden></div>
+
+<div class="modal" id="modalEspecial" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal__card">
+    <button class="modal__close" id="btnCerrarModal" type="button" aria-label="Cerrar">×</button>
+    <p class="kicker">Receta propuesta por el Chef Zero-Waste</p>
+    <h3 id="modalTitulo">Especial del Día</h3>
+    <div id="modalContenido"></div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

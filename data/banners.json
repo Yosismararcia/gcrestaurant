@@ -1,0 +1,84 @@
+{
+  "generados": [
+    {
+      "id": "banner-ceviche-del-dia",
+      "titulo": "Ceviche de Camarones",
+      "archivo": "banners/banner-ceviche-del-dia.html",
+      "tipo": "banner",
+      "nota": "-15% · Especial del Mar",
+      "fecha": "2026-08-16T15:48:42"
+    },
+    {
+      "id": "banner-pollo-saltado-criollo",
+      "titulo": "Pollo a la Brasa",
+      "archivo": "banners/banner-pollo-saltado-criollo.html",
+      "tipo": "banner",
+      "nota": "-18% · Clásicos",
+      "fecha": "2026-08-16T16:03:24"
+    },
+    {
+      "id": "alerta-7-lechuga",
+      "titulo": "Lechuga",
+      "archivo": "banners/alerta-7-lechuga.html",
+      "tipo": "alerta",
+      "nota": "S/ 30.00 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "alerta-10-cilantro",
+      "titulo": "Cilantro",
+      "archivo": "banners/alerta-10-cilantro.html",
+      "tipo": "alerta",
+      "nota": "S/ 30.00 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "alerta-11-crema-de-leche",
+      "titulo": "Crema de leche",
+      "archivo": "banners/alerta-11-crema-de-leche.html",
+      "tipo": "alerta",
+      "nota": "S/ 52.50 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "alerta-1-pescado-fresco",
+      "titulo": "Pescado fresco",
+      "archivo": "banners/alerta-1-pescado-fresco.html",
+      "tipo": "alerta",
+      "nota": "S/ 350.00 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "alerta-16-pan-ciabatta",
+      "titulo": "Pan ciabatta",
+      "archivo": "banners/alerta-16-pan-ciabatta.html",
+      "tipo": "alerta",
+      "nota": "S/ 52.80 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "alerta-6-tomate",
+      "titulo": "Tomate",
+      "archivo": "banners/alerta-6-tomate.html",
+      "tipo": "alerta",
+      "nota": "S/ 45.00 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "alerta-9-choclo",
+      "titulo": "Choclo",
+      "archivo": "banners/alerta-9-choclo.html",
+      "tipo": "alerta",
+      "nota": "S/ 37.50 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "alerta-15-pimiento-rojo",
+      "titulo": "Pimiento rojo",
+      "archivo": "banners/alerta-15-pimiento-rojo.html",
+      "tipo": "alerta",
+      "nota": "S/ 61.20 en riesgo",
+      "fecha": "2026-08-16T16:13:34"
+    }
+  ]
+}

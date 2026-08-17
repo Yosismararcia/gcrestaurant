@@ -1,0 +1,23 @@
+{
+  "copy": {
+    "ceviche del dia": {
+      "texto": "🍋 ¿Ya almorzaste? Porque este Ceviche del Día no espera a nadie. Pescado fresco marinado al momento con limón, ají limo y cebolla morada: cremoso, cítrico y directo a tu mesa de LUNES A VIERNES con -15% 🔥 En G&CRestaurant rescatamos lo más fresco cada día para que tú comas mejor y no desperdiciamos nada. 👉 Corre, que la marea sube. #CevicheFresco #PromoRestaurante #GCRestaurant",
+      "fecha": "2026-08-16"
+    }
+  },
+  "especial": {
+    "pesca del dia al cilantro": {
+      "plato": "pesca del dia al cilantro",
+      "imagen": "https://images.unsplash.com/photo-1555126634-323283e090fa?w=800&auto=format&fit=crop&q=70",
+      "inspirado_en": [
+        "Pescado fresco",
+        "Cilantro",
+        "Crema de leche",
+        "Tomate"
+      ],
+      "receta": "INGREDIENTES (unidades del inventario):\n- Pescado fresco: 0.25 kg\n- Cilantro: 0.05 kg\n- Crema de leche: 0.15 L\n- Tomate: 0.05 kg\n- Sal al gusto\nPASOS:\n1. Corta el pescado en cubos de 3 cm y sazona con sal.\n2. Sella el pescado en sarten caliente 60 segundos por lado, hasta dorar, y reserva.\n3. Procesa el cilantro con la crema de leche y la mitad del tomate hasta obtener una salsa sedosa.\n4. Vierte la salsa sobre el pescado y cocina 3 minutos a fuego bajo.\n5. Sirve con tostadas de pan ciabatta y decora con el tomate en cubos.\nTIEMPO: 15 minutos.\nZERO-WASTE: rescata 0.25 kg de pescado, cilantro, crema y tomate a punto de vencer, evitando ~S/ 8.84 en mermas.",
+      "hashtags": "#ZeroWaste #EspecialDelDia #GCRestaurant",
+      "fecha": "2026-08-16"
+    }
+  }
+}

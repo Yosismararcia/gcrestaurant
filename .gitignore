@@ -1,0 +1,35 @@
+# Dependencias y entornos
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.python-version
+
+# Despliegue
+.vercel/
+.vercelignore.bak
+.next/
+out/
+dist/
+build/
+
+# Datos sensibles / locales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE y SO
+.vscode/
+.idea/
+*.suo
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*

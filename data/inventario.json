@@ -1,0 +1,429 @@
+{
+  "ultima_actualizacion": "2026-08-16",
+  "moneda": "PEN",
+  "insumos": [
+    {
+      "id": 1,
+      "nombre": "Camarones",
+      "stock": 14.0,
+      "unidad": "kg",
+      "costo_unitario": 45.0,
+      "fecha_caducidad": "2026-08-22",
+      "categoria": "Mar y Pescado"
+    },
+    {
+      "id": 2,
+      "nombre": "Limón",
+      "stock": 40.0,
+      "unidad": "pzas",
+      "costo_unitario": 0.5,
+      "fecha_caducidad": "2026-08-30",
+      "categoria": "Fruta"
+    },
+    {
+      "id": 3,
+      "nombre": "Cebolla morada",
+      "stock": 9.92,
+      "unidad": "kg",
+      "costo_unitario": 3.5,
+      "fecha_caducidad": "2026-08-28",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 4,
+      "nombre": "Ají limo",
+      "stock": 19.96,
+      "unidad": "pzas",
+      "costo_unitario": 0.9,
+      "fecha_caducidad": "2026-08-24",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 5,
+      "nombre": "Cilantro",
+      "stock": 3.96,
+      "unidad": "kg",
+      "costo_unitario": 15.0,
+      "fecha_caducidad": "2026-08-18",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 6,
+      "nombre": "Sal",
+      "stock": 8.0,
+      "unidad": "kg",
+      "costo_unitario": 1.5,
+      "fecha_caducidad": "2027-01-01",
+      "categoria": "Condimento"
+    },
+    {
+      "id": 7,
+      "nombre": "Salmón",
+      "stock": 6.0,
+      "unidad": "kg",
+      "costo_unitario": 55.0,
+      "fecha_caducidad": "2026-08-21",
+      "categoria": "Mar y Pescado"
+    },
+    {
+      "id": 8,
+      "nombre": "Arroz sushi",
+      "stock": 12.0,
+      "unidad": "kg",
+      "costo_unitario": 12.0,
+      "fecha_caducidad": "2026-09-20",
+      "categoria": "Grano y Cereal"
+    },
+    {
+      "id": 9,
+      "nombre": "Alga nori",
+      "stock": 30.0,
+      "unidad": "hojas",
+      "costo_unitario": 5.0,
+      "fecha_caducidad": "2026-11-01",
+      "categoria": "Mar y Pescado"
+    },
+    {
+      "id": 10,
+      "nombre": "Aguacate",
+      "stock": 18.0,
+      "unidad": "pzas",
+      "costo_unitario": 3.5,
+      "fecha_caducidad": "2026-08-25",
+      "categoria": "Fruta"
+    },
+    {
+      "id": 11,
+      "nombre": "Queso crema",
+      "stock": 7.0,
+      "unidad": "kg",
+      "costo_unitario": 14.0,
+      "fecha_caducidad": "2026-08-22",
+      "categoria": "Lácteo"
+    },
+    {
+      "id": 12,
+      "nombre": "Salsa de soja",
+      "stock": 5.0,
+      "unidad": "L",
+      "costo_unitario": 9.0,
+      "fecha_caducidad": "2026-12-01",
+      "categoria": "Condimento"
+    },
+    {
+      "id": 13,
+      "nombre": "Carne de res",
+      "stock": 11.64,
+      "unidad": "kg",
+      "costo_unitario": 24.0,
+      "fecha_caducidad": "2026-08-26",
+      "categoria": "Proteina"
+    },
+    {
+      "id": 14,
+      "nombre": "Tortilla de maíz",
+      "stock": 54.0,
+      "unidad": "pzas",
+      "costo_unitario": 0.8,
+      "fecha_caducidad": "2026-08-20",
+      "categoria": "Panadería"
+    },
+    {
+      "id": 15,
+      "nombre": "Piña",
+      "stock": 11.76,
+      "unidad": "pzas",
+      "costo_unitario": 4.0,
+      "fecha_caducidad": "2026-08-27",
+      "categoria": "Fruta"
+    },
+    {
+      "id": 16,
+      "nombre": "Espagueti",
+      "stock": 9.0,
+      "unidad": "kg",
+      "costo_unitario": 8.0,
+      "fecha_caducidad": "2026-11-15",
+      "categoria": "Grano y Cereal"
+    },
+    {
+      "id": 17,
+      "nombre": "Panceta",
+      "stock": 6.0,
+      "unidad": "kg",
+      "costo_unitario": 22.0,
+      "fecha_caducidad": "2026-08-23",
+      "categoria": "Proteina"
+    },
+    {
+      "id": 18,
+      "nombre": "Huevo",
+      "stock": 48.0,
+      "unidad": "pzas",
+      "costo_unitario": 0.7,
+      "fecha_caducidad": "2026-08-28",
+      "categoria": "Proteina"
+    },
+    {
+      "id": 19,
+      "nombre": "Parmesano",
+      "stock": 5.0,
+      "unidad": "kg",
+      "costo_unitario": 40.0,
+      "fecha_caducidad": "2026-08-29",
+      "categoria": "Lácteo"
+    },
+    {
+      "id": 20,
+      "nombre": "Crema de leche",
+      "stock": 5.28,
+      "unidad": "L",
+      "costo_unitario": 8.75,
+      "fecha_caducidad": "2026-08-18",
+      "categoria": "Lácteo"
+    },
+    {
+      "id": 21,
+      "nombre": "Arroz bomba",
+      "stock": 10.0,
+      "unidad": "kg",
+      "costo_unitario": 13.0,
+      "fecha_caducidad": "2026-10-10",
+      "categoria": "Grano y Cereal"
+    },
+    {
+      "id": 22,
+      "nombre": "Calamar",
+      "stock": 7.0,
+      "unidad": "kg",
+      "costo_unitario": 32.0,
+      "fecha_caducidad": "2026-08-21",
+      "categoria": "Mar y Pescado"
+    },
+    {
+      "id": 23,
+      "nombre": "Mejillones",
+      "stock": 8.0,
+      "unidad": "kg",
+      "costo_unitario": 28.0,
+      "fecha_caducidad": "2026-08-20",
+      "categoria": "Mar y Pescado"
+    },
+    {
+      "id": 24,
+      "nombre": "Azafrán",
+      "stock": 0.05,
+      "unidad": "kg",
+      "costo_unitario": 3800.0,
+      "fecha_caducidad": "2026-12-01",
+      "categoria": "Condimento"
+    },
+    {
+      "id": 25,
+      "nombre": "Guisantes",
+      "stock": 6.0,
+      "unidad": "kg",
+      "costo_unitario": 9.0,
+      "fecha_caducidad": "2026-08-30",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 26,
+      "nombre": "Pan brioche",
+      "stock": 24.0,
+      "unidad": "pzas",
+      "costo_unitario": 3.5,
+      "fecha_caducidad": "2026-08-22",
+      "categoria": "Panadería"
+    },
+    {
+      "id": 27,
+      "nombre": "Queso cheddar",
+      "stock": 6.0,
+      "unidad": "kg",
+      "costo_unitario": 18.0,
+      "fecha_caducidad": "2026-08-25",
+      "categoria": "Lácteo"
+    },
+    {
+      "id": 28,
+      "nombre": "Lechuga",
+      "stock": 6.0,
+      "unidad": "kg",
+      "costo_unitario": 7.0,
+      "fecha_caducidad": "2026-08-19",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 29,
+      "nombre": "Tomate",
+      "stock": 9.0,
+      "unidad": "kg",
+      "costo_unitario": 6.0,
+      "fecha_caducidad": "2026-08-19",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 30,
+      "nombre": "Papas",
+      "stock": 20.0,
+      "unidad": "kg",
+      "costo_unitario": 3.0,
+      "fecha_caducidad": "2026-09-10",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 31,
+      "nombre": "Pollo entero",
+      "stock": 18.0,
+      "unidad": "kg",
+      "costo_unitario": 12.5,
+      "fecha_caducidad": "2026-08-26",
+      "categoria": "Proteina"
+    },
+    {
+      "id": 32,
+      "nombre": "Tallarines de arroz",
+      "stock": 8.0,
+      "unidad": "kg",
+      "costo_unitario": 10.0,
+      "fecha_caducidad": "2026-11-20",
+      "categoria": "Grano y Cereal"
+    },
+    {
+      "id": 33,
+      "nombre": "Brotes de soja",
+      "stock": 7.0,
+      "unidad": "kg",
+      "costo_unitario": 6.0,
+      "fecha_caducidad": "2026-08-21",
+      "categoria": "Verdura"
+    },
+    {
+      "id": 34,
+      "nombre": "Maní",
+      "stock": 5.0,
+      "unidad": "kg",
+      "costo_unitario": 11.0,
+      "fecha_caducidad": "2026-09-15",
+      "categoria": "Grano y Cereal"
+    },
+    {
+      "id": 35,
+      "nombre": "Arroz",
+      "stock": 15.0,
+      "unidad": "kg",
+      "costo_unitario": 8.0,
+      "fecha_caducidad": "2026-10-20",
+      "categoria": "Grano y Cereal"
+    },
+    {
+      "id": 36,
+      "nombre": "Pan ciabatta",
+      "stock": 20.0,
+      "unidad": "pzas",
+      "costo_unitario": 2.5,
+      "fecha_caducidad": "2026-08-20",
+      "categoria": "Panadería"
+    },
+    {
+      "id": 37,
+      "nombre": "Café",
+      "stock": 2.64,
+      "unidad": "kg",
+      "costo_unitario": 30.0,
+      "fecha_caducidad": "2026-09-25",
+      "categoria": "Bebida"
+    },
+    {
+      "id": 38,
+      "nombre": "Azúcar",
+      "stock": 8.52,
+      "unidad": "kg",
+      "costo_unitario": 3.0,
+      "fecha_caducidad": "2026-12-10",
+      "categoria": "Condimento"
+    },
+    {
+      "id": 39,
+      "nombre": "Mascarpone",
+      "stock": 4.0,
+      "unidad": "kg",
+      "costo_unitario": 22.0,
+      "fecha_caducidad": "2026-08-24",
+      "categoria": "Lácteo"
+    },
+    {
+      "id": 40,
+      "nombre": "Bizcochos de soletilla",
+      "stock": 30.0,
+      "unidad": "pzas",
+      "costo_unitario": 1.2,
+      "fecha_caducidad": "2026-09-05",
+      "categoria": "Panadería"
+    },
+    {
+      "id": 41,
+      "nombre": "Cacao en polvo",
+      "stock": 2.5,
+      "unidad": "kg",
+      "costo_unitario": 18.0,
+      "fecha_caducidad": "2026-11-01",
+      "categoria": "Postre"
+    },
+    {
+      "id": 42,
+      "nombre": "Galletas digestive",
+      "stock": 40.0,
+      "unidad": "pzas",
+      "costo_unitario": 1.5,
+      "fecha_caducidad": "2026-09-12",
+      "categoria": "Panadería"
+    },
+    {
+      "id": 43,
+      "nombre": "Mantequilla",
+      "stock": 5.0,
+      "unidad": "kg",
+      "costo_unitario": 11.0,
+      "fecha_caducidad": "2026-08-27",
+      "categoria": "Lácteo"
+    },
+    {
+      "id": 44,
+      "nombre": "Fresas",
+      "stock": 5.0,
+      "unidad": "kg",
+      "costo_unitario": 10.0,
+      "fecha_caducidad": "2026-08-20",
+      "categoria": "Fruta"
+    },
+    {
+      "id": 45,
+      "nombre": "Harina de trigo",
+      "stock": 8.0,
+      "unidad": "kg",
+      "costo_unitario": 3.5,
+      "fecha_caducidad": "2026-12-01",
+      "categoria": "Grano y Cereal"
+    },
+    {
+      "id": 46,
+      "nombre": "Chocolate",
+      "stock": 4.0,
+      "unidad": "kg",
+      "costo_unitario": 25.0,
+      "fecha_caducidad": "2026-10-01",
+      "categoria": "Postre"
+    },
+    {
+      "id": 47,
+      "nombre": "Pescado fresco",
+      "stock": 12.5,
+      "unidad": "kg",
+      "costo_unitario": 28.0,
+      "fecha_caducidad": "2026-08-19",
+      "categoria": "Mar y Pescado"
+    }
+  ]
+}
