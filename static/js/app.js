@@ -24,9 +24,12 @@
   const ESTADO = {
     promociones: [],
     banners: [],
+    comentarios: [],
     contenido: { copy: {}, especial: {} },
     resumen: {},
+    sesion: null, // { autenticado, admin, rol, usuario, nombre, cedula }
     carrito: {}, // clave = nombre normalizado, valor = { plato, qty }
+    misPedidos: [],
   };
 
   const EMOJIS = {
@@ -35,6 +38,8 @@
     "light": "🥗", "clásicos": "🍗", "sopas": "🍲", "bebidas": "🍹",
     "postres": "🍰",
   };
+
+  let starSelector = null;
 
   const MONEDA = "S/";
 
@@ -70,7 +75,24 @@
   /* ---------- render: stats públicas ---------- */
   function renderStats() {
     $("#statPromos").textContent = ESTADO.resumen.total_promociones ?? ESTADO.promociones.length;
-    $("#statBanners").textContent = ESTADO.resumen.total_banners ?? ESTADO.banners.length;
+    $("#statPlatos").textContent = ESTADO.promociones.length;
+    $("#statComentarios").textContent = ESTADO.resumen.total_comentarios ?? ESTADO.comentarios.length;
+  }
+
+  /* ---------- render: sesión del cliente ---------- */
+  function renderUsuario() {
+    const s = ESTADO.sesion;
+    const chip = $("#userChip");
+    const btn = $("#btnIngresar");
+    if (s && s.autenticado) {
+      $("#userNombre").textContent = s.nombre || s.usuario;
+      $("#userCedula").textContent = s.rol === "admin" ? "Administrador" : ("Cédula " + (s.cedula || "—"));
+      chip.hidden = false;
+      btn.hidden = true;
+    } else {
+      chip.hidden = true;
+      btn.hidden = false;
+    }
   }
 
   /* ---------- render: promociones ---------- */
@@ -122,6 +144,38 @@
       </article>`;
   }
 
+  /* ---------- destacadas (lo más pedido + rescates, rotación semanal) ---------- */
+  function tarjetaDestacada(p, idx) {
+    const precio = Number.isFinite(p.precio_final) && Number.isFinite(p.precio_base)
+      ? `<span class="band__precio">${MONEDA} ${formatear(p.precio_final)} <s>${MONEDA} ${formatear(p.precio_base)}</s></span>`
+      : `<span class="band__precio">${MONEDA} —</span>`;
+    const motivo = p.razon
+      ? `<span class="band__tag">${p.razon === "Variedad de la semana" ? "🎡" : p.razon === "Rescata frescura" ? "🌿" : "🏆"} ${p.razon}</span>`
+      : "";
+    return `
+      <article class="band__card reveal" style="animation-delay:${idx * 60}ms">
+        <span class="band__off">-${p.descuento}%</span>
+        <span class="band__emoji">${emojiPorCategoria(p.categoria)}</span>
+        <h3 class="band__titulo">${p.plato}</h3>
+        <p class="band__texto">${p.descripcion}</p>
+        <div class="band__pie">
+          <span>${p.categoria}</span>
+          ${precio}
+        </div>
+        ${motivo}
+        <button class="btn btn--primary btn--cta-s" data-agregar="${p.plato}" type="button">+ Pedir</button>
+      </article>`;
+  }
+
+  function renderDestacadas() {
+    const grid = $("#gridDestacadas");
+    if (!grid) return;
+    const lista = (ESTADO.destacadas || []).slice(0, 6);
+    grid.innerHTML = lista.map((p, idx) => tarjetaDestacada(p, idx)).join("");
+    const band = $("#bandDestacadas");
+    if (band) band.hidden = lista.length === 0;
+  }
+
   /* ---------- filtros ---------- */
   function poblarCategorias() {
     const sel = $("#filtroCategoria");
@@ -170,47 +224,138 @@
       </article>`;
   }
 
-  /* ---------- render: banners ---------- */
-  async function renderBanners() {
-    const grid = $("#gridBanners");
-    const banners = ESTADO.banners.filter((b) => b.tipo === "banner");
-    if (!banners.length) {
-      grid.innerHTML = `<article class="card"><div class="card__body"><p class="empty">Nuevos banners llegando pronto. 🎨</p></div></article>`;
+  /* ---------- render: menú (precios regulares) ---------- */
+  function renderMenu() {
+    const grid = $("#gridMenu");
+    const lista = ESTADO.promociones.slice();
+    if (!lista.length) {
+      grid.innerHTML = `<article class="card"><div class="card__body"><p class="empty">El menú aún no está disponible. Vuelve pronto.</p></div></article>`;
       return;
     }
-    const promoDeBanner = (b) => {
-      let p = ESTADO.promociones.find((x) => norm(x.plato) === norm(b.titulo));
-      if (p) return p;
-      const cat = (b.nota || "").split("·").pop().trim();
-      p = cat
-        ? ESTADO.promociones.find((x) => x.categoria.toLowerCase() === cat.toLowerCase())
-        : null;
-      return p || ESTADO.promociones.find((x) => x.imagen) || null;
-    };
-    grid.innerHTML = banners.map((b, i) => {
-      const promo = promoDeBanner(b);
-      const emoji = promo ? emojiPorCategoria(promo.categoria) : "🎨";
-      const foto = `<div class="card__img">${topDeTarjeta(promo || { plato: b.titulo }, emoji)}</div>`;
+    grid.innerHTML = lista.map((p, idx) => {
+      const precio = Number.isFinite(p.precio_base)
+        ? `<span class="card__precio">${MONEDA} ${formatear(p.precio_base)}</span>`
+        : `<span class="card__precio">${MONEDA} —</span>`;
       return `
-        <article class="card reveal" style="animation-delay:${i * 70}ms">
-          ${promo ? foto : `<div class="card__img card__img--warm3">${emoji}</div>`}
-          <div class="card__body" data-cuerpo-banner="${b.id}"></div>
-        </article>`;
+      <article class="card reveal" style="animation-delay:${idx * 40}ms">
+        <div class="card__img">
+          ${topDeTarjeta(p, emojiPorCategoria(p.categoria))}
+          <span class="badge badge--categoria">${p.categoria}</span>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">${p.plato}</h3>
+          <p class="card__text">${p.descripcion}</p>
+          <div class="card__meta"><span>🗓️ ${p.dias}</span><span>${emojiPorCategoria(p.categoria)} ${p.categoria}</span></div>
+          <div class="card__foot">
+            ${precio}
+            <button class="btn btn--ghost btn--cta-s" data-ir-promo="${p.plato}" type="button">Ver promoción</button>
+          </div>
+        </div>
+      </article>`;
     }).join("");
+  }
 
-    banners.forEach(async (b) => {
-      try {
-        const res = await fetch(`/banners/${b.archivo.replace(/^banners\//, "")}`);
-        const html = await res.text();
-        const cuerpo = grid.querySelector(`[data-cuerpo-banner="${b.id}"]`);
-        if (cuerpo) {
-          cuerpo.innerHTML = html.trim();
-          cuerpo.closest("article").classList.add("banner-vivo");
-        }
-      } catch (err) {
-        console.warn("No se pudo inyectar el banner", b.archivo, err);
-      }
-    });
+  /* ---------- render: comentarios ---------- */
+  const ESTRELLAS = (n) => "★".repeat(n) + "☆".repeat(5 - n);
+
+  function renderComentarios() {
+    const grid = $("#gridComentarios");
+    const lista = ESTADO.comentarios || [];
+    $("#emptyComentarios").hidden = lista.length > 0;
+    grid.innerHTML = lista.map((c, idx) => {
+      const fecha = c.creado ? new Date(c.creado).toLocaleDateString("es-PE", { day: "2-digit", month: "short" }) : "";
+      return `
+      <article class="card card--comentario reveal" style="animation-delay:${idx * 40}ms">
+        <div class="card__body">
+          <span class="comment__autor">${c.autor}</span>
+          <span class="comment__stars">${ESTRELLAS(Math.max(1, Math.min(5, c.estrellas || 5)))}</span>
+          <p class="comment__texto">“${c.texto}”</p>
+          <div class="card__foot"><span></span><small style="color:var(--tinta-suave)">${fecha}</small></div>
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  function estrellasSel() {
+    let valor = 5;
+    const btns = document.querySelectorAll("#starsSel .star");
+    const pintar = () => btns.forEach((b) => b.classList.toggle("activo", Number(b.dataset.estrella) <= valor));
+    btns.forEach((b) => b.addEventListener("click", () => { valor = Number(b.dataset.estrella); pintar(); }));
+    pintar();
+    return { get: () => valor };
+  }
+
+  async function enviarComentario(ev) {
+    ev.preventDefault();
+    const msg = $("#msgComentario");
+    msg.hidden = true;
+    const texto = $("#inComentario").value.trim();
+    if (!texto) { msg.textContent = "Escribe tu comentario."; msg.hidden = false; msg.className = "auth__msg auth__msg--err"; return; }
+    try {
+      const res = await fetch("/api/comentario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto, estrellas: starSelector.get() }),
+      });
+      const data = await res.json();
+      if (!data.ok) { msg.textContent = data.error || "No se pudo publicar."; msg.className = "auth__msg auth__msg--err"; msg.hidden = false; return; }
+      $("#inComentario").value = "";
+      msg.textContent = data.mensaje;
+      msg.className = "auth__msg auth__msg--ok";
+      msg.hidden = false;
+      ESTADO.comentarios.unshift(data.comentario);
+      ESTADO.resumen.total_comentarios = (ESTADO.resumen.total_comentarios || 0) + 1;
+      renderComentarios();
+      renderStats();
+      setTimeout(() => { msg.hidden = true; }, 6000);
+    } catch (err) {
+      msg.textContent = "Error de conexión. Intenta de nuevo.";
+      msg.className = "auth__msg auth__msg--err";
+      msg.hidden = false;
+    }
+  }
+
+  /* ---------- render: mis pedidos ---------- */
+  const ESTADOS = {
+    nuevo: { texto: "Nuevo", clase: "tag--crit" },
+    en_preparacion: { texto: "En preparación", clase: "tag--azul" },
+    listo: { texto: "Listo 🍽️", clase: "tag--warn" },
+    entregado: { texto: "Entregado ✅", clase: "tag--ok" },
+  };
+
+  function renderMisPedidos() {
+    const grid = $("#gridPedidos");
+    const lista = ESTADO.misPedidos || [];
+    $("#emptyPedidos").hidden = lista.length > 0;
+    grid.innerHTML = lista.map((p, idx) => {
+      const st = ESTADOS[p.estado] || ESTADOS.nuevo;
+      const platos = (p.platos || []).map((d) => `${d.cantidad ?? 1}× ${d.plato}`).join(" · ");
+      const fecha = p.creado ? new Date(p.creado).toLocaleString("es-PE", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+      return `
+      <article class="card card--pedido reveal" style="animation-delay:${idx * 40}ms">
+        <div class="card__body">
+          <div class="card__meta">
+            <span class="orden__numero">#${p.numero_orden}</span>
+            <span class="tag ${st.clase}">${st.texto}</span>
+          </div>
+          <p class="orden__platos">${platos}</p>
+          <div class="card__foot">
+            <span class="orden__total">${MONEDA} ${formatear(p.total)}</span>
+            <small style="color:var(--tinta-suave)">${fecha}</small>
+          </div>
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  async function cargarMisPedidos() {
+    try {
+      const res = await fetch("/api/mis-pedidos");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.ok) ESTADO.misPedidos = data.pedidos || [];
+      renderMisPedidos();
+    } catch (err) { /* silencioso en segundo plano */ }
   }
 
   /* ---------- carrito (pedido del cliente) ---------- */
@@ -261,6 +406,10 @@
   }
 
   async function confirmarPedido() {
+    if (!ESTADO.sesion || !ESTADO.sesion.autenticado) {
+      if (window.GCAuth) window.GCAuth.abrir("login");
+      return;
+    }
     const nombres = [];
     Object.values(ESTADO.carrito).forEach(({ plato, qty }) => {
       const original = ESTADO.promociones.find((p) => norm(p.plato) === norm(plato));
@@ -279,10 +428,13 @@
       if (data.ok) {
         ESTADO.carrito = {};
         renderCarrito();
-        $("#notaPedido").textContent = data.mensaje;
-        $("#notaPedido").style.color = "var(--verde)";
+        const orden = $("#ordenPedido");
+        orden.hidden = false;
+        orden.textContent = "🧾 Tu pedido #" + data.numero_orden + " fue registrado. El restaurante ya lo prepara.";
+        orden.style.color = "var(--verde)";
+        $("#notaPedido").textContent = "";
         cierreCarrito();
-        setTimeout(() => { $("#notaPedido").textContent = ""; }, 6000);
+        setTimeout(() => { orden.hidden = true; }, 12000);
       } else {
         $("#notaPedido").textContent = "❌ " + (data.error || "No se pudo procesar el pedido.");
         $("#notaPedido").style.color = "var(--rojo)";
@@ -332,8 +484,10 @@
 
   function renderTodo() {
     renderStats();
+    renderMenu();
     renderPromos($("#buscador").value);
     renderEspecial();
+    renderDestacadas();
     renderCarrito();
   }
 
@@ -350,6 +504,13 @@
       if (enlaceVista) {
         ev.preventDefault();
         mostrarVista(enlaceVista.dataset.vista);
+        return;
+      }
+      const irPromo = ev.target.closest("[data-ir-promo]");
+      if (irPromo) {
+        $("#buscador").value = irPromo.dataset.irPromo;
+        renderPromos(irPromo.dataset.irPromo);
+        mostrarVista("promociones");
         return;
       }
       const agregar = ev.target.closest("[data-agregar]");
@@ -382,9 +543,15 @@
     });
 
     $("#btnCarrito").addEventListener("click", abrirCarrito);
+    $("#btnSalir").addEventListener("click", () => {
+      if (window.GCAuth) window.GCAuth.cerrarSesion();
+    });
     $("#btnCerrarCarrito").addEventListener("click", cierreCarrito);
     $("#btnConfirmarPedido").addEventListener("click", confirmarPedido);
     $("#btnCerrarModal").addEventListener("click", cerrarModal);
+    $("#btnIngresar").addEventListener("click", () => {
+      if (window.GCAuth) window.GCAuth.abrir("login");
+    });
     $("#overlay").addEventListener("click", () => { cierreCarrito(); cerrarModal(); });
     $("#buscador").addEventListener("input", (ev) => renderPromos(ev.target.value));
     $("#filtroCategoria").addEventListener("change", () => renderPromos($("#buscador").value));
@@ -395,6 +562,9 @@
     document.querySelectorAll("[data-nav]").forEach((a) =>
       a.addEventListener("click", () => document.querySelector(".nav").classList.remove("open"))
     );
+
+    starSelector = estrellasSel();
+    $("#formComentario").addEventListener("submit", enviarComentario);
   }
 
   /* ---------- inicio ---------- */
@@ -406,11 +576,17 @@
       const datos = await res.json();
       ESTADO.promociones = datos.promociones || [];
       ESTADO.banners = datos.banners || [];
+      ESTADO.destacadas = datos.destacadas || [];
+      ESTADO.comentarios = datos.comentarios || [];
       ESTADO.contenido = datos.contenido || { copy: {}, especial: {} };
       ESTADO.resumen = datos.resumen || {};
+      ESTADO.sesion = datos.sesion || { autenticado: false, admin: false };
+      renderUsuario();
       poblarCategorias();
       renderTodo();
-      renderBanners();
+      renderComentarios();
+      cargarMisPedidos();
+      setInterval(cargarMisPedidos, 5000);
       mostrarVista("inicio");
     } catch (err) {
       $("#gridPromos").innerHTML = `<article class="card"><div class="card__body"><p class="empty">No se pudo conectar con el restaurante. Intenta de nuevo en unos segundos.</p></div></article>`;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="G&CRestaurant: generador de promociones, marketing express y control de inventario fresco.">
+  <meta name="description" content="G&CRestaurant: cocina internacional y postres con promociones diarias, marketing express y control de inventario fresco. Regístrate y descubre el Especial del Día.">
   <title>G&amp;CRestaurant · Sabores que no se pierden</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,82 +12,285 @@
     :root {
       --fondo: #fff7ed; --tinta: #3a2a1f; --suave: #6b5240;
       --primario: #ea580c; --primario-oscuro: #7c2d12; --verde: #15803d;
-      --radio: 20px;
+      --radio: 20px; --rojo: #c62828; --crema: #fbe9d4; --alt: #fdeedb;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: "Inter", sans-serif; color: var(--tinta);
+      font-family: "Inter", system-ui, sans-serif; color: var(--tinta);
       background:
         radial-gradient(1100px 500px at 85% -10%, #ffedd5, transparent 60%),
         radial-gradient(900px 500px at -10% 110%, #fed7aa, transparent 55%),
         var(--fondo);
-      min-height: 100vh; display: flex; flex-direction: column;
+      overflow-x: hidden;
     }
-    .portada { flex: 1; display: grid; place-items: center; padding: 40px 20px; position: relative; overflow: hidden; }
-    .emoji-fondo { position: absolute; opacity: .35; font-size: 3.4rem; filter: blur(1px); animation: flotar 6s ease-in-out infinite; }
-    .e1 { top: 8%; left: 6%; } .e2 { top: 20%; right: 8%; animation-delay: 1.2s; }
-    .e3 { bottom: 12%; left: 12%; animation-delay: 2s; } .e4 { bottom: 6%; right: 16%; animation-delay: .6s; }
-    @keyframes flotar { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-16px) } }
+    .container { width: min(980px, 94%); margin-inline: auto; }
 
-    .card {
-      text-align: center; max-width: 640px; width: 100%;
-      background: rgba(255,255,255,.92); border: 1px solid #f7ead7;
-      border-radius: var(--radio); padding: 46px 38px;
-      box-shadow: 0 40px 90px -40px rgba(124,45,18,.55);
-      animation: entrar .6s ease both;
-    }
-    @keyframes entrar { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
-
-    .logo { width: 74px; height: 74px; margin: 0 auto 14px; border-radius: 20px; display: grid; place-items: center;
+    /* ---------- Header ---------- */
+    .header { position: sticky; top: 0; z-index: 60; background: rgba(255,247,237,.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--crema); }
+    .header__inner { display: flex; align-items: center; gap: 20px; padding-block: 12px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tinta); }
+    .brand__logo {
+      display: grid; place-items: center; width: 42px; height: 42px;
       background: linear-gradient(140deg, var(--primario), var(--primario-oscuro));
-      color: #fff; font-family: "Fraunces", serif; font-weight: 900; font-size: 1.5rem; box-shadow: 0 18px 30px -14px rgba(234,88,12,.7); }
-    .kicker { color: var(--primario); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: 2px; }
-    h1 { font-family: "Fraunces", serif; font-weight: 900; font-size: clamp(1.8rem, 6vw, 2.6rem); margin: 12px 0 10px; line-height: 1.15; }
-    h1 em { font-style: normal; color: var(--primario); }
-    .sub { color: var(--suave); font-size: 1rem; line-height: 1.55; margin-bottom: 30px; }
-
-    .accesos { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    .acceso {
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-      text-decoration: none; border-radius: 16px; padding: 26px 16px;
-      background: #fff; border: 1px solid #f7ead7; transition: .22s; color: var(--tinta);
-      box-shadow: 0 12px 26px -18px rgba(124,45,18,.4);
+      color: #fff; font-family: "Fraunces", serif; font-weight: 900; font-size: 14px;
+      border-radius: 13px; border: 2px solid #ffe0b8; box-shadow: 0 18px 30px -14px rgba(234,88,12,.7);
     }
-    .acceso:hover { transform: translateY(-5px); border-color: var(--primario); box-shadow: 0 22px 34px -18px rgba(234,88,12,.5); }
-    .acceso__icono { font-size: 2rem; }
-    .acceso b { font-family: "Fraunces", serif; font-weight: 900; font-size: 1.05rem; }
-    .acceso small { color: var(--suave); font-size: .78rem; line-height: 1.4; }
-    .acceso--cliente { border-top: 4px solid var(--primario); }
+    .brand__text { font-family: "Fraunces", serif; font-weight: 900; font-size: 1.05rem; line-height: 1.1; }
+    .brand__text small { display: block; font-family: "Inter", sans-serif; font-weight: 600; font-size: .6rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--suave); }
+    .nav { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-left: auto; }
+    .nav a { text-decoration: none; color: var(--suave); font-weight: 600; font-size: .9rem; padding: 4px 2px; transition: .2s; }
+    .nav a:hover { color: var(--primario); }
+    .header__actions { display: flex; align-items: center; gap: 10px; }
+    .user-chip { display: inline-flex; align-items: center; gap: 10px; flex-wrap: nowrap; white-space: nowrap; min-width: 0; background: #fff; border: 1px solid var(--crema); padding: 5px 7px 5px 13px; border-radius: 999px; font-size: .8rem; }
+    .user-chip b { color: var(--primario-oscuro); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .user-chip .btn--cta-s { flex-shrink: 0; }
 
-    .pie { text-align: center; padding: 22px; color: var(--suave); font-size: .8rem; }
-    @media (max-width: 560px) { .accesos { grid-template-columns: 1fr; } .card { padding: 32px 22px; } }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border: 0; cursor: pointer; font-family: "Inter", sans-serif; font-weight: 700;
+      font-size: .92rem; padding: 11px 20px; border-radius: 14px; transition: .2s; text-decoration: none;
+    }
+    .btn--primary { background: linear-gradient(140deg, var(--primario), var(--primario-oscuro)); color: #fff; box-shadow: 0 18px 30px -14px rgba(234,88,12,.7); }
+    .btn--primary:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .btn--ghost { background: rgba(255,255,255,.65); color: var(--tinta); border: 1.5px solid rgba(234,88,12,.35); }
+    .btn--ghost:hover { background: #fff; }
+    .btn--block { width: 100%; }
+    .btn--cta-s { padding: 7px 14px; border-radius: 10px; font-size: .82rem; }
+
+    /* ---------- Secciones (landing con scroll) ---------- */
+    .slide { padding-block: 84px; scroll-margin-top: 72px; }
+    .slide--alt { background: var(--alt); }
+    .slide__inner { width: min(980px, 94%); margin-inline: auto; text-align: center; }
+    .badge--hero { display: inline-block; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: .78rem; letter-spacing: .4px; background: rgba(255,253,249,.85); color: var(--primario-oscuro); box-shadow: 0 12px 26px -18px rgba(124,45,18,.4); }
+    .kicker { font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; font-size: .72rem; color: var(--primario); margin-bottom: 8px; }
+    .slide__title { font-family: "Fraunces", serif; font-weight: 900; font-size: clamp(1.6rem, 3.4vw, 2.5rem); line-height: 1.1; margin-block: 10px 8px; }
+    .slide__title em { font-style: normal; color: var(--primario); }
+    .slide__sub { max-width: 640px; margin-inline: auto; color: var(--suave); font-size: .98rem; }
+    .slide__cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 22px; }
+
+    .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 34px; align-items: center; text-align: left; }
+    .hero-texto { text-align: left; }
+    .hero-texto .slide__sub { margin-inline: 0; }
+    .hero-texto .slide__cta { justify-content: flex-start; }
+    .hero-fotos { position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 14px; height: min(46vh, 420px); }
+    .hero-fotos img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; box-shadow: 0 24px 50px -24px rgba(124,45,18,.5); border: 3px solid #fff; }
+    .hero-fotos .foto-main { grid-row: span 2; }
+    .hero-fotos .foto-tag { position: absolute; top: -12px; right: -6px; background: linear-gradient(140deg, var(--primario), var(--primario-oscuro)); color: #fff; font-family: "Fraunces", serif; font-weight: 900; font-size: .82rem; padding: 8px 16px; border-radius: 999px; box-shadow: 0 14px 26px -12px rgba(234,88,12,.8); }
+
+    .grid { display: grid; gap: 14px; }
+    .grid--3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .card { background: rgba(255,255,255,.95); border-radius: var(--radio); padding: 20px; border: 1px solid #f7ead7; box-shadow: 0 18px 40px -18px rgba(124,45,18,.35); text-align: left; }
+    .card__icono { font-size: 1.7rem; margin-bottom: 8px; }
+    .card__titulo { font-family: "Fraunces", serif; font-weight: 900; font-size: 1rem; margin-bottom: 5px; }
+    .card__text { font-size: .84rem; color: var(--suave); line-height: 1.55; }
+
+    .paso { display: flex; gap: 12px; align-items: flex-start; text-align: left; }
+    .paso__num { flex-shrink: 0; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: linear-gradient(140deg, var(--primario), var(--primario-oscuro)); color: #fff; font-family: "Fraunces", serif; font-weight: 900; }
+    .paso b { display: block; font-size: .95rem; margin-bottom: 3px; }
+    .paso p { color: var(--suave); font-size: .84rem; }
+
+    /* ---------- Auth ---------- */
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; background: var(--fondo); padding: 6px; border-radius: 13px; }
+    .tab { border: 0; cursor: pointer; font: inherit; font-weight: 700; font-size: .88rem; padding: 9px; border-radius: 10px; color: var(--suave); background: transparent; transition: .2s; }
+    .tab.activo { background: #fff; color: var(--primario-oscuro); box-shadow: 0 6px 14px -8px rgba(124,45,18,.4); }
+    .auth { display: grid; gap: 10px; }
+    .auth__label { font-size: .76rem; font-weight: 700; color: var(--suave); }
+    .auth__input { width: 100%; font: inherit; padding: 10px 13px; border-radius: 11px; border: 1.5px solid var(--crema); background: #fff; color: var(--tinta); outline: none; transition: .2s; }
+    .auth__input:focus { border-color: var(--primario); box-shadow: 0 0 0 3px rgba(234,88,12,.15); }
+    .auth__msg { font-size: .8rem; font-weight: 600; text-align: center; }
+    .auth__msg--ok { color: var(--verde); }
+    .auth__msg--err { color: var(--rojo); }
+    .auth__hint { text-align: center; font-size: .8rem; color: var(--suave); background: var(--fondo); border: 1px dashed var(--crema); border-radius: 12px; padding: 9px; }
+
+    /* ---------- Modal de acceso ---------- */
+    .overlay { position: fixed; inset: 0; background: rgba(43,26,16,.55); backdrop-filter: blur(4px); z-index: 90; }
+    .modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 18px; }
+    .modal__card { position: relative; width: min(460px, 100%); max-height: 86vh; overflow-y: auto; background: #fff; border-radius: 22px; padding: 26px 28px; box-shadow: 0 40px 90px -40px rgba(124,45,18,.6); text-align: left; }
+    .modal__close { position: absolute; top: 12px; right: 12px; border: 0; background: var(--fondo); color: var(--suave); width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
+    .modal__close:hover { background: var(--crema); color: var(--primario-oscuro); }
+    .modal__title { font-family: "Fraunces", serif; font-weight: 900; font-size: 1.35rem; margin: 6px 0 6px; }
+    .modal__card .slide__sub { margin-inline: 0; }
+
+    /* ---------- Footer ---------- */
+    .footer { background: var(--tinta); color: #e9d5c0; padding-block: 34px; margin-top: 20px; }
+    .footer__inner { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space-between; align-items: center; }
+    .footer__text { font-size: .92rem; margin-top: 8px; }
+    .footer__meta { text-align: right; font-size: .88rem; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) { .brand__text small { display: none; } }
+    @media (max-width: 860px) {
+      .nav { order: 3; width: 100%; margin-left: 0; justify-content: flex-start; gap: 6px 18px; padding-bottom: 8px; }
+      .hero-grid { grid-template-columns: 1fr; text-align: center; }
+      .hero-texto { text-align: center; }
+      .hero-texto .slide__sub { margin-inline: auto; }
+      .hero-texto .slide__cta { justify-content: center; }
+      .hero-fotos { display: none; }
+    }
+    @media (max-width: 560px) { .footer__meta { text-align: left; } }
   </style>
 </head>
 <body>
-  <div class="portada">
-    <span class="emoji-fondo e1">🍜</span>
-    <span class="emoji-fondo e2">🍣</span>
-    <span class="emoji-fondo e3">🍰</span>
-    <span class="emoji-fondo e4">🍹</span>
 
-    <main class="card">
-      <div class="logo">G&C</div>
-      <p class="kicker">foodtech · zero waste</p>
-      <h1>Sabores que no se pierden,<br><em>promos que sí se venden.</em></h1>
-      <p class="sub">
-        Cocina internacional y postres con descuento, marketing express y control de inventario fresco.
-        Entra y descubre las promociones de hoy:
-      </p>
-
-      <div class="accesos">
-        <a class="acceso acceso--cliente" href="/cliente">
-          <span class="acceso__icono">🍽️</span>
-          <b>Ver promociones de hoy</b>
-          <small>Promos internacionales y postres, el Especial del Día, banners y pedidos rápidos.</small>
-        </a>
+  <header class="header">
+    <div class="container header__inner">
+      <a class="brand" href="#inicio" aria-label="G&CRestaurant inicio">
+        <span class="brand__logo">G&C</span>
+        <span class="brand__text">Restaurant<small>foodtech · zero waste</small></span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a href="#inicio">Inicio</a>
+        <a href="#nosotros">Nosotros</a>
+        <a href="#servicios">Lo que ofrecemos</a>
+        <a href="#pasos">Pasos</a>
+      </nav>
+      <div class="header__actions">
+        <span class="user-chip" id="userChip" hidden>
+          <b id="userNombre">—</b>
+          <button class="btn btn--ghost btn--cta-s" id="btnSalir" type="button" title="Cerrar sesión">Salir</button>
+        </span>
+        <button class="btn btn--ghost btn--cta-s" id="ctaEntrar" type="button">Entrar</button>
       </div>
-    </main>
-  </div>
-  <footer class="pie">G&amp;CRestaurant · promociones, marketing express y cero mermas.</footer>
+    </div>
+  </header>
+
+  <main id="inicio">
+
+    <!-- 1 · HERO -->
+    <section class="slide" id="inicio-sec">
+      <div class="slide__inner hero-grid">
+        <div class="hero-texto">
+          <span class="badge--hero">🔥 Promociones &amp; Marketing Express</span>
+          <h1 class="slide__title">Sabores que no se pierden,<br><em>promos que sí se venden.</em></h1>
+          <p class="slide__sub">
+            G&amp;CRestaurant convierte el inventario fresco en ofertas irresistibles: cocina internacional,
+            postres y un <strong>Especial del Día</strong> que rescata lo más fresco. Descubre promos reales,
+            precios justos y banners listos para compartir.
+          </p>
+          <div class="slide__cta">
+            <button class="btn btn--primary" id="ctaEntrarHero" type="button">Ingresar para pedir</button>
+            <button class="btn btn--ghost" id="ctaSiguiente" type="button">Conócenos ↓</button>
+          </div>
+        </div>
+        <div class="hero-fotos" aria-hidden="true">
+          <span class="foto-tag">🍳 Especial del Día</span>
+          <img class="foto-main" src="https://commons.wikimedia.org/wiki/Special:FilePath/Cebiche_de_corvina.JPG?width=800" alt="Ceviche" loading="eager">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Sushi_platter.jpg?width=800" alt="Sushi" loading="lazy">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Strawberry_cheesecake_round.jpg?width=800" alt="Cheesecake de fresa" loading="lazy">
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · QUIÉNES SOMOS -->
+    <section class="slide slide--alt" id="nosotros">
+      <div class="slide__inner">
+        <p class="kicker">Nuestra historia</p>
+        <h2 class="slide__title">Cocina internacional<br>con alma de barrio</h2>
+        <p class="slide__sub">G&amp;CRestaurant nació de una familia que ama cocinar para los demás. Desde la primera cazuela hasta hoy, reunimos en una sola mesa las recetas más queridas del mundo: frescura, cariño y sabor de casa en cada plato.</p>
+        <div class="grid grid--3" style="margin-top:22px">
+          <div class="card"><div class="card__icono">📖</div><h3 class="card__titulo">Nuestra historia</h3><p class="card__text">Empezamos en una cocina pequeña, con una receta de familia y muchas ganas de hacer feliz a cada comensal.</p></div>
+          <div class="card"><div class="card__icono">📍</div><h3 class="card__titulo">Nuestras sucursales</h3><p class="card__text">Encuéntranos en el Centro, Miraflores y San Isidro. Tres rincones de la ciudad, el mismo sabor de siempre.</p></div>
+          <div class="card"><div class="card__icono">🍽️</div><h3 class="card__titulo">Nuestra cocina</h3><p class="card__text">Ceviches, sushi, paellas, currys, burgers y postres: una vuelta al mundo en cada visita.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 · QUÉ OFRECEMOS -->
+    <section class="slide" id="servicios">
+      <div class="slide__inner">
+        <p class="kicker">Lo que ofrecemos</p>
+        <h2 class="slide__title">Más que un menú: una experiencia</h2>
+        <div class="grid grid--3" style="margin-top:20px">
+          <div class="card"><div class="card__icono">🍽️</div><h3 class="card__titulo">Platillos del mundo</h3><p class="card__text">Ceviches, sushi, paellas, currys, burgers y postres. Una carta que viaja por el mundo.</p></div>
+          <div class="card"><div class="card__icono">🍳</div><h3 class="card__titulo">Especial del Día</h3><p class="card__text">El plato estrella de la jornada, preparado por nuestro chef hasta agotar porción.</p></div>
+          <div class="card"><div class="card__icono">🎉</div><h3 class="card__titulo">Promociones de hoy</h3><p class="card__text">Descuentos reales todos los días en tus platillos favoritos.</p></div>
+          <div class="card"><div class="card__icono">🤝</div><h3 class="card__titulo">Atención que enamora</h3><p class="card__text">Un equipo que te recibe con una sonrisa y te ayuda a elegir el plato perfecto.</p></div>
+          <div class="card"><div class="card__icono">🏡</div><h3 class="card__titulo">Ambiente de barrio</h3><p class="card__text">Un espacio cálido para compartir en familia, con amigos o en tu pausa del mediodía.</p></div>
+          <div class="card"><div class="card__icono">⚡</div><h3 class="card__titulo">Servicio rápido</h3><p class="card__text">Tu pedido listo en minutos, para comer aquí o llevar.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · PASOS -->
+    <section class="slide slide--alt" id="pasos">
+      <div class="slide__inner">
+        <p class="kicker">Así de fácil</p>
+        <h2 class="slide__title">Tres pasos para comer mejor</h2>
+        <div class="grid grid--3" style="margin-top:24px">
+          <div class="card">
+            <div class="paso"><span class="paso__num">1</span><div><b>Crea tu cuenta</b><p>Nombre, cédula/DNI y contraseña. Gratis, en menos de un minuto.</p></div></div>
+          </div>
+          <div class="card">
+            <div class="paso"><span class="paso__num">2</span><div><b>Elige tus promos</b><p>Revisa el Especial del Día y los platillos con descuento.</p></div></div>
+          </div>
+          <div class="card">
+            <div class="paso"><span class="paso__num">3</span><div><b>Pide y disfruta</b><p>Confirma y el restaurante lo prepara al momento.</p></div></div>
+          </div>
+        </div>
+        <div class="slide__cta">
+          <button class="btn btn--primary" id="ctaRegistrar" type="button">Crear mi cuenta gratis</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="overlay" id="overlayAcceso" hidden></div>
+  <div class="modal" id="modalAcceso" hidden role="dialog" aria-modal="true" aria-labelledby="modalAccesoTitulo"></div>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div>
+        <span class="brand__logo">G&C</span>
+        <p class="footer__text">Cocina internacional, postres y promos que sí se venden.</p>
+      </div>
+      <div class="footer__meta">
+        <p>Hecho con OpenCode · Flask · Vercel</p>
+        <p>G&CRestaurant · Sabores que no se pierden</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+  <script>
+    (() => {
+      "use strict";
+      const $ = (s) => document.querySelector(s);
+
+      const irA = (selector) => {
+        const el = $(selector);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+
+      /* ---------- barra superior / sesión ---------- */
+      const renderSesion = (sesion) => {
+        const aut = sesion && sesion.autenticado;
+        $("#userNombre").textContent = aut ? (sesion.admin ? "Admin: " + (sesion.nombre || sesion.usuario) : sesion.nombre || sesion.usuario) : "";
+        $("#userChip").hidden = !aut;
+        $("#ctaEntrar").hidden = aut;
+        $("#ctaEntrarHero").textContent = aut ? "Ver promociones" : "Ingresar para pedir";
+      };
+      window.GCAuth.onCambio = renderSesion;
+
+      /* ---------- CTAs ---------- */
+      const abrirOIr = (tab) => {
+        if (window.GCAuth.sesion.autenticado) {
+          window.location.href = window.GCAuth.sesion.admin ? "/admin" : "/cliente";
+          return;
+        }
+        window.GCAuth.abrir(tab);
+      };
+
+      $("#ctaEntrarHero").addEventListener("click", () => abrirOIr("login"));
+      $("#ctaSiguiente").addEventListener("click", () => irA("#nosotros"));
+      $("#ctaRegistrar").addEventListener("click", () => abrirOIr("registro"));
+      $("#ctaEntrar").addEventListener("click", () => window.GCAuth.abrir("login"));
+      $("#btnSalir").addEventListener("click", () => window.GCAuth.cerrarSesion());
+
+      window.GCAuth.sincronizar();
+    })();
+  </script>
 </body>
 </html>

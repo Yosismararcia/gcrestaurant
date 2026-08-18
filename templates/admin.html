@@ -20,36 +20,73 @@
     </a>
     <div class="header__actions" style="margin-left:auto">
       <a class="btn btn--ghost" href="/cliente" style="font-size:.85rem">← Ver web pública</a>
+      <button class="btn btn--primary btn--cta-s" id="btnIngresar" type="button" hidden>Ingresar</button>
       <button class="btn btn--primary btn--cta-s" id="btnLogout" type="button" hidden>Salir 🔒</button>
     </div>
   </div>
   <nav class="container admin-nav" id="adminNav" hidden aria-label="Secciones del panel">
     <button class="admin-nav__btn activo" data-vista="resumen" type="button">📊 Resumen</button>
+    <button class="admin-nav__btn" data-vista="pedidos" type="button">🧾 Pedidos <span class="tag tag--crit" id="navPedidosNuevos" hidden>0</span></button>
+    <button class="admin-nav__btn" data-vista="clientes" type="button">👥 Clientes</button>
     <button class="admin-nav__btn" data-vista="promociones" type="button">🍽️ Promociones</button>
     <button class="admin-nav__btn" data-vista="especial" type="button">🍳 Especial</button>
     <button class="admin-nav__btn" data-vista="inventario" type="button">📦 Inventario</button>
     <button class="admin-nav__btn" data-vista="anuncios" type="button">🎨 Anuncios</button>
-    <button class="admin-nav__btn" data-vista="avisos" type="button">⚠️ Avisos</button>
+    <button class="admin-nav__btn" data-vista="avisos" type="button">🥫 Mermas</button>
   </nav>
 </header>
 
 <main class="container" style="padding-block:40px">
 
-  <!-- LOGIN -->
-  <section class="login-card" id="loginBox" hidden>
-    <div class="login-card__emoji">🔐</div>
-    <h2>Acceso restringido</h2>
-    <p class="section__sub">Solo el administrador del restaurante puede ver el inventario, las recetas y los avisos.</p>
-    <form id="formLogin" class="login-card__form">
-      <input class="input" id="inUsuario" type="text" placeholder="Usuario" autocomplete="username" required>
-      <input class="input" id="inPassword" type="password" placeholder="Contraseña" autocomplete="current-password" required>
-      <button class="btn btn--primary btn--block" type="submit">Entrar al panel</button>
-      <p class="drawer__note" id="loginMsg" style="color:var(--rojo);margin-top:10px" hidden></p>
-    </form>
-  </section>
-
   <!-- PANEL -->
   <section id="dashboard" hidden aria-live="polite">
+
+    <div class="admin-vista" data-vista="pedidos">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Pedidos de clientes · tiempo real</p>
+        <h2 class="section__title">Pedidos</h2>
+      </div>
+      <div class="admin-sec" id="secPedidos">
+        <h3 class="admin-sec__titulo">🧾 Órdenes recientes</h3>
+        <p class="section__sub">
+          Los nuevos pedidos aparecen al instante. Marca como visto y avanza el estado:
+          el cliente ve el cambio en su sección "Mis pedidos".
+        </p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Orden</th><th>Cliente</th><th>Platos</th><th class="num">Total</th><th>Estado</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPedidos"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="emptyPedidos" hidden>No hay pedidos todavía. 🍽️</p>
+      </div>
+    </div>
+
+    <div class="admin-vista" data-vista="clientes">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Dinero acumulado por compras</p>
+        <h2 class="section__title">Clientes</h2>
+      </div>
+      <div class="admin-sec" id="secClientes">
+        <h3 class="admin-sec__titulo">👥 Gasto acumulado por cliente</h3>
+        <p class="section__sub">Cada pedido suma al total del cliente. Ordenados por mayor gasto.</p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Cliente</th><th>Usuario</th><th>Cédula / DNI</th><th class="num">Pedidos</th><th class="num">Total acumulado</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyClientes"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="emptyClientes" hidden>Todavía no hay clientes registrados. 👥</p>
+      </div>
+    </div>
 
     <div class="admin-vista activa" data-vista="resumen">
       <div class="section__head" style="margin-bottom:20px">
@@ -61,6 +98,7 @@
         <div class="kpi"><b id="kInsumos">–</b><span>Insumos</span></div>
         <div class="kpi kpi--crit"><b id="kCriticos">–</b><span>Por vencer</span></div>
         <div class="kpi"><b id="kValor">–</b><span>Valor inventario</span></div>
+        <div class="kpi kpi--venta"><b id="kVentas">–</b><span>Ventas</span></div>
       </div>
       <div class="admin-sec" id="secAlertas">
         <h3 class="admin-sec__titulo">⚠️ Avisos de vencimiento</h3>
@@ -134,6 +172,15 @@
         <p class="kicker">Promos y banners en vivo</p>
         <h2 class="section__title">Gestión de anuncios</h2>
       </div>
+      <div class="admin-sec" id="secDestacadas">
+        <h3 class="admin-sec__titulo">🏆 Recomendadas por ventas y rotación semanal</h3>
+        <p class="section__sub">
+          Lo más pedido entre semanas + rescates de frescura + variedad. La selección rota cada semana para no aburrir al cliente.
+        </p>
+        <div class="grid grid--banners" id="gridDestacadas"></div>
+        <button class="btn btn--primary" id="btnGenerarSemana" type="button">⚡ Generar banners de la semana</button>
+        <p class="auth__msg" id="msgGenerarSemana" hidden></p>
+      </div>
       <div class="admin-sec" id="secBanners">
         <h3 class="admin-sec__titulo">🎨 Anuncios promocionales</h3>
         <p class="section__sub">Banners de los platillos que se publican en el sitio público.</p>
@@ -151,13 +198,39 @@
 
     <div class="admin-vista" data-vista="avisos">
       <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Insumos por vencer</p>
-        <h2 class="section__title">Avisos de inventario</h2>
+        <p class="kicker">Control de mermas · en tiempo real</p>
+        <h2 class="section__title">Mermas y rescate</h2>
       </div>
-      <div class="admin-sec" id="secAvisos">
-        <h3 class="admin-sec__titulo">⚠️ Avisos de vencimiento</h3>
-        <p class="section__sub">Cada aviso corresponde a un insumo del inventario próximo a caducar.</p>
-        <div class="grid grid--banners" id="gridAvisos"></div>
+      <div class="kpis">
+        <div class="kpi kpi--crit"><b id="mAvisosCriticos">–</b><span>Por vencer</span></div>
+        <div class="kpi kpi--venta"><b id="mAvisosValor">–</b><span>Valor en riesgo</span></div>
+        <div class="kpi"><b id="mAvisosRescatables">–</b><span>Con platillo</span></div>
+      </div>
+      <div class="admin-sec" id="secCombo">
+        <h3 class="admin-sec__titulo">Combo del día · propuesta zero-waste</h3>
+        <p class="section__sub">Una combinación automática de los insumos más urgentes lista para venderse hoy.</p>
+        <div id="cardCombo"></div>
+        <p class="empty" id="emptyCombo" hidden>Todo el inventario está fresco. No hace falta rescate hoy. 🎉</p>
+      </div>
+      <div class="admin-sec" id="secPropuestas">
+        <h3 class="admin-sec__titulo">Platillos que rescatan cada insumo</h3>
+        <p class="section__sub">Qué se puede vender con cada insumo a punto de vencer, ordenado por urgencia.</p>
+        <div class="inv-filtro">
+          <input class="inv-buscar" id="rescBuscar" type="search"
+                 placeholder="🔍  Buscar insumo o platillo…" autocomplete="off" aria-label="Buscar insumo o platillo">
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Insumo</th><th class="num">Stock</th><th class="num">Valor S/</th>
+                <th>Caducidad</th><th>Platillos que lo usan</th><th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPropuestas"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="emptyPropuestas" hidden>Sin insumos críticos. Todo fresco. 🎉</p>
       </div>
     </div>
   </section>
@@ -170,7 +243,10 @@
   </div>
 </div>
 <div class="overlay" id="overlay" hidden></div>
+<div class="overlay" id="overlayAcceso" hidden></div>
+<div class="modal" id="modalAcceso" hidden role="dialog" aria-modal="true" aria-labelledby="modalAccesoTitulo"></div>
 
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 <script src="{{ url_for('static', filename='js/flyer.js') }}"></script>
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>

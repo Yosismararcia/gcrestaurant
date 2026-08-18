@@ -175,4 +175,4 @@ el inventario, las recetas y los avisos quedan protegidos en `/admin` con sesió
 | Fechas de caducidad pasadas (demo vieja) | `.\scripts\refrescar_demo.ps1` recalcula las fechas relativas a hoy. |
 | No aparece la galería de banners | Ejecuta `/generar_banner "Nombre del plato"` en OpenCode. |
 | Pedido rechazado por stock | El plato requiere insumos que ya se agotaron; repón stock en `inventario.json` o ajusta cantidades. |
-| Escritura efímera en Vercel | En Vercel los archivos son de solo lectura entre peticiones (función serverless). El flujo complete funciona en local; en producción usa el esquema con `contenido.json`/`banners.json` generados desde GitHub.# gcrestaurant
+| Escritura efímera en Vercel | En Vercel los archivos son de solo lectura entre peticiones (función serverless). El flujo complete funciona en local; en producción usa el esquema con `contenido.json`/`banners.json` generados desde GitHub.

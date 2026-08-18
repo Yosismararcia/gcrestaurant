@@ -79,6 +79,14 @@
       "tipo": "alerta",
       "nota": "S/ 61.20 en riesgo",
       "fecha": "2026-08-16T16:13:34"
+    },
+    {
+      "id": "banner-ceviche-de-camarones",
+      "titulo": "Ceviche de Camarones",
+      "archivo": "banners/banner-ceviche-de-camarones.html",
+      "tipo": "banner",
+      "nota": "-15% · Especial del Mar",
+      "fecha": "2026-08-18T01:18:55"
     }
   ]
 }

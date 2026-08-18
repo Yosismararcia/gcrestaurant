@@ -38,6 +38,7 @@
 .kpi b { display: block; font-family: "Fraunces", serif; font-weight: 900; font-size: 1.5rem; color: var(--primario-oscuro); }
 .kpi span { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--tinta-suave); }
 .kpi--crit b { color: var(--rojo); }
+.kpi--venta b { color: var(--verde); }
 
 .admin-sec { margin-top: 44px; }
 .admin-sec__titulo { font-family: "Fraunces", serif; font-weight: 900; font-size: 1.3rem; margin-bottom: 14px; }
@@ -70,5 +71,14 @@
   box-shadow: 0 4px 10px -4px rgba(0,0,0,.3); transition: .2s;
 }
 .card__x:hover { background: var(--rojo); color: #fff; transform: scale(1.1); }
+
+/* Propuesta zero-waste del día (control de mermas) */
+.combo-card { border-left: 6px solid var(--verde); background: linear-gradient(160deg, #fffdf9, #fff); }
+.combo-card .card__title { color: var(--primario-oscuro); }
+.combo-card .card__meta span {
+  display: inline-block; background: var(--fondo-crema); border-radius: 999px;
+  padding: 4px 12px; font-size: .8rem; font-weight: 700; margin-top: 4px;
+}
+#tbodyPropuestas .tag--azul small { font-weight: 800; opacity: .8; }
 
 body { min-height: 100vh; }

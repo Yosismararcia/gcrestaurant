@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body>
+<body class="cliente">
 
 <header class="header">
   <div class="container header__inner">
@@ -19,11 +19,14 @@
       <span class="brand__text">Restaurant<small>foodtech · zero waste</small></span>
     </a>
     <nav class="nav" aria-label="Principal">
+      <a href="#menu" data-nav data-vista="menu">Menú</a>
       <a href="#promociones" data-nav data-vista="promociones">Promociones</a>
       <a href="#especial" data-nav data-vista="especial">Especial del Día</a>
-      <a href="#banners" data-nav data-vista="banners">Banners</a>
+      <a href="#comentarios" data-nav data-vista="comentarios">Comentarios</a>
+      <a href="#pedidos" data-nav data-vista="pedidos">Mis pedidos</a>
     </nav>
     <div class="header__actions">
+      <button class="btn btn--ghost" id="btnIngresar" type="button" hidden>Ingresar</button>
       <button class="btn btn--cart" id="btnCarrito" type="button" aria-label="Abrir pedido">
         <span class="cart-icon">🧺</span>
         <span class="cart-badge" id="cartBadge">0</span>
@@ -32,6 +35,10 @@
       <button class="nav-toggle" id="navToggle" type="button" aria-label="Menú">
         <span></span><span></span><span></span>
       </button>
+      <span class="user-chip" id="userChip" hidden>
+        <span class="user-chip__data"><b id="userNombre">—</b><small id="userCedula"></small></span>
+        <button class="btn btn--cta-s" id="btnSalir" type="button" title="Cerrar sesión">Salir</button>
+      </span>
     </div>
   </div>
 </header>
@@ -55,13 +62,35 @@
         </div>
         <div class="hero__stats" id="heroStats" aria-live="polite">
           <div class="stat"><span class="stat__num" id="statPromos">–</span><span class="stat__label">Promociones</span></div>
-          <div class="stat"><span class="stat__num" id="statBanners">–</span><span class="stat__label">Banners</span></div>
+          <div class="stat"><span class="stat__num" id="statPlatos">–</span><span class="stat__label">Platillos en menú</span></div>
+          <div class="stat"><span class="stat__num" id="statComentarios">–</span><span class="stat__label">Comentarios</span></div>
         </div>
       </div>
     </div>
+    <div class="container band" id="bandDestacadas">
+      <div class="band__head">
+        <div>
+          <p class="kicker">Lo que más se pide · esta semana</p>
+          <h2 class="band__title">Promos destacadas del día</h2>
+        </div>
+        <span class="band__aviso">Se renuevan cada semana 🎡</span>
+      </div>
+      <div class="band__track" id="gridDestacadas" aria-live="polite"></div>
+    </div>
   </section>
 
-  <section class="section vista" id="promociones" data-vista="promociones">
+  <section class="section vista" id="menu" data-vista="menu">
+    <div class="container">
+      <div class="section__head">
+        <p class="kicker">Nuestra carta</p>
+        <h2 class="section__title">Menú</h2>
+        <p class="section__sub">Cocina internacional y postres: conoce todo lo que preparamos para ti.</p>
+      </div>
+      <div class="grid grid--promos" id="gridMenu" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="section section--crema vista" id="promociones" data-vista="promociones">
     <div class="container">
       <div class="section__head">
         <p class="kicker">Listo para pedir</p>
@@ -95,14 +124,41 @@
     </div>
   </section>
 
-  <section class="section vista" id="banners" data-vista="banners">
+  <section class="section vista" id="comentarios" data-vista="comentarios">
     <div class="container">
       <div class="section__head">
-        <p class="kicker">Promos listas para compartir</p>
-        <h2 class="section__title">Galería de banners promocionales</h2>
-        <p class="section__sub">Nuestras mejores ofertas, listas para redes sociales. Nuevos banners cada semana.</p>
+        <p class="kicker">Tu opinión cuenta</p>
+        <h2 class="section__title">Comentarios de nuestros clientes</h2>
+        <p class="section__sub">Cuéntanos cómo fue tu experiencia en el restaurante.</p>
       </div>
-      <div class="mt-0 grid grid--banners" id="gridBanners" aria-live="polite"></div>
+      <form class="comment-form" id="formComentario">
+        <div class="comment-form__head">
+          <div class="stars" id="starsSel" role="radiogroup" aria-label="Calificación">
+            <button type="button" class="star activo" data-estrella="5" aria-label="5 estrellas">★</button>
+            <button type="button" class="star" data-estrella="4" aria-label="4 estrellas">★</button>
+            <button type="button" class="star" data-estrella="3" aria-label="3 estrellas">★</button>
+            <button type="button" class="star" data-estrella="2" aria-label="2 estrellas">★</button>
+            <button type="button" class="star" data-estrella="1" aria-label="1 estrella">★</button>
+          </div>
+          <textarea class="input comment-form__texto" id="inComentario" rows="3" placeholder="Escribe tu comentario…" required></textarea>
+          <button class="btn btn--primary" type="submit">Publicar comentario</button>
+          <p class="auth__msg" id="msgComentario" hidden></p>
+        </div>
+      </form>
+      <div class="grid grid--comentarios" id="gridComentarios" aria-live="polite"></div>
+      <p class="empty" id="emptyComentarios" hidden>No hay comentarios todavía. ¡Sé el primero en contarnos! 💬</p>
+    </div>
+  </section>
+
+  <section class="section section--crema vista" id="pedidos" data-vista="pedidos">
+    <div class="container">
+      <div class="section__head">
+        <p class="kicker">Sigue tu pedido</p>
+        <h2 class="section__title">Mis pedidos</h2>
+        <p class="section__sub">Aquí verás tu número de orden y su estado en tiempo real, actualizado por el restaurante.</p>
+      </div>
+      <div class="grid grid--pedidos" id="gridPedidos" aria-live="polite"></div>
+      <p class="empty" id="emptyPedidos" hidden>No tienes pedidos aún. ¡Elige algo del menú! 🍽️</p>
     </div>
   </section>
 
@@ -116,7 +172,7 @@
     </div>
     <div class="footer__meta">
       <p>Hecho con OpenCode · Flask · Vercel</p>
-      <p>Promociones, Especial del Día y banners para nuestros clientes.</p>
+      <p>Promociones, Especial del Día y pedidos para nuestros clientes.</p>
     </div>
   </div>
 </footer>
@@ -133,11 +189,15 @@
     <div class="totales" id="totalesPedido">
       <div class="total"><span>Total</span><b id="totalPedido">S/ 0.00</b></div>
     </div>
+    <p class="drawer__note" id="ordenPedido" hidden></p>
     <button class="btn btn--primary btn--block" id="btnConfirmarPedido" type="button" disabled>Confirmar & descontar inventario ✔️</button>
     <p class="drawer__note" id="notaPedido"></p>
   </div>
 </aside>
 <div class="overlay" id="overlay" hidden></div>
+
+<div class="overlay" id="overlayAcceso" hidden></div>
+<div class="modal" id="modalAcceso" hidden role="dialog" aria-modal="true" aria-labelledby="modalAccesoTitulo"></div>
 
 <div class="modal" id="modalEspecial" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
   <div class="modal__card">
@@ -148,6 +208,7 @@
   </div>
 </div>
 
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

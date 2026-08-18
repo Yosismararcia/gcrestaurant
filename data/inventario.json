@@ -1,11 +1,11 @@
 {
-  "ultima_actualizacion": "2026-08-16",
+  "ultima_actualizacion": "2026-08-17",
   "moneda": "PEN",
   "insumos": [
     {
       "id": 1,
       "nombre": "Camarones",
-      "stock": 14.0,
+      "stock": 13.38,
       "unidad": "kg",
       "costo_unitario": 45.0,
       "fecha_caducidad": "2026-08-22",
@@ -14,7 +14,7 @@
     {
       "id": 2,
       "nombre": "Limón",
-      "stock": 40.0,
+      "stock": 31.0,
       "unidad": "pzas",
       "costo_unitario": 0.5,
       "fecha_caducidad": "2026-08-30",
@@ -23,7 +23,7 @@
     {
       "id": 3,
       "nombre": "Cebolla morada",
-      "stock": 9.92,
+      "stock": 9.74,
       "unidad": "kg",
       "costo_unitario": 3.5,
       "fecha_caducidad": "2026-08-28",
@@ -32,7 +32,7 @@
     {
       "id": 4,
       "nombre": "Ají limo",
-      "stock": 19.96,
+      "stock": 19.83,
       "unidad": "pzas",
       "costo_unitario": 0.9,
       "fecha_caducidad": "2026-08-24",
@@ -41,7 +41,7 @@
     {
       "id": 5,
       "nombre": "Cilantro",
-      "stock": 3.96,
+      "stock": 3.86,
       "unidad": "kg",
       "costo_unitario": 15.0,
       "fecha_caducidad": "2026-08-18",
@@ -50,7 +50,7 @@
     {
       "id": 6,
       "nombre": "Sal",
-      "stock": 8.0,
+      "stock": 7.98,
       "unidad": "kg",
       "costo_unitario": 1.5,
       "fecha_caducidad": "2027-01-01",
@@ -59,7 +59,7 @@
     {
       "id": 7,
       "nombre": "Salmón",
-      "stock": 6.0,
+      "stock": 5.78,
       "unidad": "kg",
       "costo_unitario": 55.0,
       "fecha_caducidad": "2026-08-21",
@@ -68,7 +68,7 @@
     {
       "id": 8,
       "nombre": "Arroz sushi",
-      "stock": 12.0,
+      "stock": 11.82,
       "unidad": "kg",
       "costo_unitario": 12.0,
       "fecha_caducidad": "2026-09-20",
@@ -77,7 +77,7 @@
     {
       "id": 9,
       "nombre": "Alga nori",
-      "stock": 30.0,
+      "stock": 29.0,
       "unidad": "hojas",
       "costo_unitario": 5.0,
       "fecha_caducidad": "2026-11-01",
@@ -86,7 +86,7 @@
     {
       "id": 10,
       "nombre": "Aguacate",
-      "stock": 18.0,
+      "stock": 17.85,
       "unidad": "pzas",
       "costo_unitario": 3.5,
       "fecha_caducidad": "2026-08-25",
@@ -95,7 +95,7 @@
     {
       "id": 11,
       "nombre": "Queso crema",
-      "stock": 7.0,
+      "stock": 6.94,
       "unidad": "kg",
       "costo_unitario": 14.0,
       "fecha_caducidad": "2026-08-22",
@@ -104,7 +104,7 @@
     {
       "id": 12,
       "nombre": "Salsa de soja",
-      "stock": 5.0,
+      "stock": 4.92,
       "unidad": "L",
       "costo_unitario": 9.0,
       "fecha_caducidad": "2026-12-01",
@@ -113,7 +113,7 @@
     {
       "id": 13,
       "nombre": "Carne de res",
-      "stock": 11.64,
+      "stock": 11.28,
       "unidad": "kg",
       "costo_unitario": 24.0,
       "fecha_caducidad": "2026-08-26",
@@ -122,7 +122,7 @@
     {
       "id": 14,
       "nombre": "Tortilla de maíz",
-      "stock": 54.0,
+      "stock": 48.0,
       "unidad": "pzas",
       "costo_unitario": 0.8,
       "fecha_caducidad": "2026-08-20",
@@ -131,7 +131,7 @@
     {
       "id": 15,
       "nombre": "Piña",
-      "stock": 11.76,
+      "stock": 11.52,
       "unidad": "pzas",
       "costo_unitario": 4.0,
       "fecha_caducidad": "2026-08-27",
@@ -158,7 +158,7 @@
     {
       "id": 18,
       "nombre": "Huevo",
-      "stock": 48.0,
+      "stock": 44.0,
       "unidad": "pzas",
       "costo_unitario": 0.7,
       "fecha_caducidad": "2026-08-28",
@@ -167,7 +167,7 @@
     {
       "id": 19,
       "nombre": "Parmesano",
-      "stock": 5.0,
+      "stock": 4.96,
       "unidad": "kg",
       "costo_unitario": 40.0,
       "fecha_caducidad": "2026-08-29",
@@ -176,7 +176,7 @@
     {
       "id": 20,
       "nombre": "Crema de leche",
-      "stock": 5.28,
+      "stock": 5.1,
       "unidad": "L",
       "costo_unitario": 8.75,
       "fecha_caducidad": "2026-08-18",
@@ -185,7 +185,7 @@
     {
       "id": 21,
       "nombre": "Arroz bomba",
-      "stock": 10.0,
+      "stock": 9.8,
       "unidad": "kg",
       "costo_unitario": 13.0,
       "fecha_caducidad": "2026-10-10",
@@ -194,7 +194,7 @@
     {
       "id": 22,
       "nombre": "Calamar",
-      "stock": 7.0,
+      "stock": 6.9,
       "unidad": "kg",
       "costo_unitario": 32.0,
       "fecha_caducidad": "2026-08-21",
@@ -203,7 +203,7 @@
     {
       "id": 23,
       "nombre": "Mejillones",
-      "stock": 8.0,
+      "stock": 7.88,
       "unidad": "kg",
       "costo_unitario": 28.0,
       "fecha_caducidad": "2026-08-20",
@@ -212,7 +212,7 @@
     {
       "id": 24,
       "nombre": "Azafrán",
-      "stock": 0.05,
+      "stock": 0.049,
       "unidad": "kg",
       "costo_unitario": 3800.0,
       "fecha_caducidad": "2026-12-01",
@@ -221,7 +221,7 @@
     {
       "id": 25,
       "nombre": "Guisantes",
-      "stock": 6.0,
+      "stock": 5.96,
       "unidad": "kg",
       "costo_unitario": 9.0,
       "fecha_caducidad": "2026-08-30",
@@ -248,7 +248,7 @@
     {
       "id": 28,
       "nombre": "Lechuga",
-      "stock": 6.0,
+      "stock": 5.82,
       "unidad": "kg",
       "costo_unitario": 7.0,
       "fecha_caducidad": "2026-08-19",
@@ -257,7 +257,7 @@
     {
       "id": 29,
       "nombre": "Tomate",
-      "stock": 9.0,
+      "stock": 8.88,
       "unidad": "kg",
       "costo_unitario": 6.0,
       "fecha_caducidad": "2026-08-19",
@@ -275,7 +275,7 @@
     {
       "id": 31,
       "nombre": "Pollo entero",
-      "stock": 18.0,
+      "stock": 17.57,
       "unidad": "kg",
       "costo_unitario": 12.5,
       "fecha_caducidad": "2026-08-26",
@@ -284,7 +284,7 @@
     {
       "id": 32,
       "nombre": "Tallarines de arroz",
-      "stock": 8.0,
+      "stock": 7.82,
       "unidad": "kg",
       "costo_unitario": 10.0,
       "fecha_caducidad": "2026-11-20",
@@ -293,7 +293,7 @@
     {
       "id": 33,
       "nombre": "Brotes de soja",
-      "stock": 7.0,
+      "stock": 6.94,
       "unidad": "kg",
       "costo_unitario": 6.0,
       "fecha_caducidad": "2026-08-21",
@@ -302,7 +302,7 @@
     {
       "id": 34,
       "nombre": "Maní",
-      "stock": 5.0,
+      "stock": 4.96,
       "unidad": "kg",
       "costo_unitario": 11.0,
       "fecha_caducidad": "2026-09-15",
@@ -320,7 +320,7 @@
     {
       "id": 36,
       "nombre": "Pan ciabatta",
-      "stock": 20.0,
+      "stock": 19.6,
       "unidad": "pzas",
       "costo_unitario": 2.5,
       "fecha_caducidad": "2026-08-20",
@@ -329,7 +329,7 @@
     {
       "id": 37,
       "nombre": "Café",
-      "stock": 2.64,
+      "stock": 2.6,
       "unidad": "kg",
       "costo_unitario": 30.0,
       "fecha_caducidad": "2026-09-25",
@@ -338,7 +338,7 @@
     {
       "id": 38,
       "nombre": "Azúcar",
-      "stock": 8.52,
+      "stock": 8.44,
       "unidad": "kg",
       "costo_unitario": 3.0,
       "fecha_caducidad": "2026-12-10",
@@ -347,7 +347,7 @@
     {
       "id": 39,
       "nombre": "Mascarpone",
-      "stock": 4.0,
+      "stock": 3.88,
       "unidad": "kg",
       "costo_unitario": 22.0,
       "fecha_caducidad": "2026-08-24",
@@ -356,7 +356,7 @@
     {
       "id": 40,
       "nombre": "Bizcochos de soletilla",
-      "stock": 30.0,
+      "stock": 29.92,
       "unidad": "pzas",
       "costo_unitario": 1.2,
       "fecha_caducidad": "2026-09-05",
@@ -365,7 +365,7 @@
     {
       "id": 41,
       "nombre": "Cacao en polvo",
-      "stock": 2.5,
+      "stock": 2.47,
       "unidad": "kg",
       "costo_unitario": 18.0,
       "fecha_caducidad": "2026-11-01",
@@ -383,7 +383,7 @@
     {
       "id": 43,
       "nombre": "Mantequilla",
-      "stock": 5.0,
+      "stock": 4.94,
       "unidad": "kg",
       "costo_unitario": 11.0,
       "fecha_caducidad": "2026-08-27",
@@ -401,7 +401,7 @@
     {
       "id": 45,
       "nombre": "Harina de trigo",
-      "stock": 8.0,
+      "stock": 7.92,
       "unidad": "kg",
       "costo_unitario": 3.5,
       "fecha_caducidad": "2026-12-01",
@@ -410,7 +410,7 @@
     {
       "id": 46,
       "nombre": "Chocolate",
-      "stock": 4.0,
+      "stock": 3.88,
       "unidad": "kg",
       "costo_unitario": 25.0,
       "fecha_caducidad": "2026-10-01",

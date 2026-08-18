@@ -24,15 +24,24 @@
   const norm = (s) => (s || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
   let DATA = null;
+  let PEDIDOS = [];
   let refrescoTimer = null;
   let invFiltro = "";
   let recFiltro = "";
+  let rescFiltro = "";
 
   const formatear = (n) =>
     (Number.isFinite(n) ? n : 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const tituloBonito = (s) =>
     (s || "").replace(/\w\S*/g, (t) => t.charAt(0).toUpperCase() + t.slice(1));
+
+  const ESTADOS_ADMIN = {
+    nuevo: { texto: "Nuevo", clase: "tag--crit" },
+    en_preparacion: { texto: "En preparación", clase: "tag--azul" },
+    listo: { texto: "Listo", clase: "tag--warn" },
+    entregado: { texto: "Entregado", clase: "tag--ok" },
+  };
 
   const imgProxy = (url) =>
     /^https?:\/\/(commons\.wikimedia\.org|upload\.wikimedia\.org)\//.test(url || "")
@@ -49,9 +58,13 @@
     return `<span class="card__emoji-fb card__emoji-fb--warm3">🍳</span>`;
   }
 
+  function abrirAcceso() {
+    if (window.GCAuth) window.GCAuth.abrir("login");
+  }
+
   function toggleUI(esAdmin) {
-    $("#loginBox").hidden = esAdmin;
     $("#dashboard").hidden = !esAdmin;
+    $("#btnIngresar").hidden = esAdmin;
     $("#btnLogout").hidden = !esAdmin;
     $("#adminNav").hidden = !esAdmin;
   }
@@ -84,7 +97,24 @@
     $("#kInsumos").textContent = r.total_insumos;
     $("#kCriticos").textContent = r.insumos_criticos;
     $("#kValor").textContent = `${MONEDA} ${formatear(r.valor_inventario)}`;
+    $("#kVentas").textContent = `${MONEDA} ${formatear(r.ventas)}`;
     $("#ventanaAlertas").textContent = DATA.ventana_alertas;
+  }
+
+  function renderClientes() {
+    const tbody = $("#tbodyClientes");
+    if (!tbody) return;
+    const lista = DATA.clientes || [];
+    const empty = $("#emptyClientes");
+    if (empty) empty.hidden = lista.length > 0;
+    tbody.innerHTML = lista.map((c) => `
+        <tr>
+          <td><strong>${c.nombre}</strong></td>
+          <td>${c.usuario}</td>
+          <td>${c.cedula || "—"}</td>
+          <td class="num">${c.pedidos}</td>
+          <td class="num"><strong>${MONEDA} ${formatear(c.gasto_acumulado)}</strong></td>
+        </tr>`).join("");
   }
 
   function renderAlertas() {
@@ -262,24 +292,98 @@
     }).join("");
   }
 
-  function renderAvisos() {
-    const grid = $("#gridAvisos");
-    const avisos = DATA.banners.filter((b) => b.tipo === "alerta");
-    if (!avisos.length) {
-      grid.innerHTML = `<article class="card"><div class="card__body"><p class="empty">Sin avisos de inventario generados.</p></div></article>`;
+  function renderMermas() {
+    const prop = DATA.propuestas || [];
+    const rescatables = prop.filter((x) => x.platos.length > 0).length;
+    $("#mAvisosCriticos").textContent = prop.length;
+    $("#mAvisosValor").textContent = `${MONEDA} ${formatear(prop.reduce((a, x) => a + (x.valor || 0), 0))}`;
+    $("#mAvisosRescatables").textContent = rescatables;
+  }
+
+  function renderCombo() {
+    const combo = DATA.combo_del_dia;
+    const card = $("#cardCombo");
+    const empty = $("#emptyCombo");
+    if (!combo) {
+      if (card) card.innerHTML = "";
+      if (empty) empty.hidden = false;
       return;
     }
-    grid.innerHTML = avisos.map((b, i) => `
-      <article class="card reveal" style="animation-delay:${i * 40}ms">
-        <button class="card__x" data-x-banner="${b.id}" type="button" title="Retirar aviso" aria-label="Retirar aviso">✕</button>
-        <div class="card__img">${fotoAviso(b)}</div>
+    if (empty) empty.hidden = true;
+    if (!card) return;
+    card.innerHTML = `
+      <article class="card combo-card reveal">
         <div class="card__body">
-          <span class="badge badge--dia">⚠️ Aviso de inventario</span>
-          <h3 class="card__title">${b.titulo}</h3>
-          <p class="card__text">${b.nota || ""}</p>
+          <span class="badge badge--dia">🌿 Zero-Waste</span>
+          <h3 class="card__title">${tituloBonito(combo.nombre)}</h3>
+          <p class="card__text">Inspirado en: <strong>${combo.inspirado_en.join(", ")}</strong>.</p>
+          <p class="card__text">${combo.sugerencia}</p>
+          <div class="card__meta">
+            <span>💵 Recupera ${MONEDA} ${formatear(combo.valor_recuperado)}</span>
+            <span>🥘 ${combo.insumos.length} insumos por vencer</span>
+          </div>
+        </div>
+      </article>`;
+  }
+
+  function renderPropuestas() {
+    const tbody = $("#tbodyPropuestas");
+    const empty = $("#emptyPropuestas");
+    const q = rescFiltro.trim().toLowerCase();
+    let lista = DATA.propuestas || [];
+    if (q) {
+      lista = lista.filter((x) =>
+        (x.insumo || "").toLowerCase().includes(q) ||
+        x.platos.some((p) => (p.plato || "").toLowerCase().includes(q)));
+    }
+    if (empty) empty.hidden = lista.length > 0;
+    if (!tbody) return;
+    if (!lista.length) {
+      tbody.innerHTML = "";
+      return;
+    }
+    tbody.innerHTML = lista.map((x) => {
+      const dias = x.dias;
+      const texto = x.vencido ? `Vencido hace ${Math.abs(dias)}d` : dias === 0 ? "Caduca HOY" : `Expira en ${dias}d`;
+      const tag = x.vencido || dias <= 1 ? "tag--crit" : dias <= 3 ? "tag--warn" : "tag--ok";
+      const platos = x.platos.length
+        ? x.platos.map((p) => `<span class="tag tag--azul">${p.plato} <small>-${p.descuento}%</small></span>`).join(" ")
+        : '<span class="tag tag--warn">Sin platillo</span>';
+      const accion = x.platos.length
+        ? `<button class="btn btn--cta-s" data-gbanner="${x.platos[0].plato}" type="button">🎨 Banner</button>`
+        : "—";
+      return `
+        <tr>
+          <td><strong>${x.vencido ? "☠️ " : ""}${x.insumo}</strong> <small style="color:var(--tinta-suave)">${x.unidad}</small></td>
+          <td class="num">${x.stock} ${x.unidad}</td>
+          <td class="num"><strong>${MONEDA} ${formatear(x.valor)}</strong></td>
+          <td><span class="tag ${tag}">${texto}</span></td>
+          <td style="font-size:.85rem">${platos}</td>
+          <td>${accion}</td>
+        </tr>`;
+    }).join("");
+  }
+
+  function renderDestacadas() {
+    const grid = $("#gridDestacadas");
+    const lista = (DATA.destacadas || []).slice(0, 6);
+    if (!lista.length) {
+      grid.innerHTML = `<article class="card"><div class="card__body"><p class="empty">Sin recomendaciones por ahora.</p></div></article>`;
+      return;
+    }
+    grid.innerHTML = lista.map((d, i) => `
+      <article class="card reveal" style="animation-delay:${i * 40}ms">
+        <div class="card__body">
+          <span class="badge badge--descuento">-${d.descuento}%</span>
+          <h3 class="card__title">${d.plato}</h3>
+          <p class="card__text">${d.descripcion}</p>
+          <div class="card__meta">
+            <span>${d.razon}</span>
+            ${d.ventas_semana ? `<span>🏆 ${d.ventas_semana} pedido(s) esta semana</span>` : ""}
+          </div>
+          ${d.rescata && d.rescata.length ? `<p class="card__text" style="font-size:.82rem">🌿 Rescata: ${d.rescata.join(", ")}</p>` : ""}
           <div class="card__foot">
-            <span class="tag ${b.oculto ? "tag--crit" : "tag--ok"}">${b.oculto ? "Oculto" : "Visible"}</span>
-            <button class="btn btn--cta-s" data-btoggle="${b.id}" data-oculto="${b.oculto ? "1" : "0"}" type="button">${b.oculto ? "Mostrar" : "Ocultar"}</button>
+            <button class="btn btn--cta-s" data-gbanner="${d.plato}" type="button">🎨 Generar banner</button>
           </div>
         </div>
       </article>`).join("");
@@ -326,8 +430,12 @@
       ["Recetas", renderRecetas],
       ["Inventario", renderInventario],
       ["Banners", renderBanners],
-      ["Avisos", renderAvisos],
+      ["Mermas", renderMermas],
+      ["Combo", renderCombo],
+      ["Propuestas", renderPropuestas],
+      ["Destacadas", renderDestacadas],
       ["Anuncios", renderAnuncios],
+      ["Clientes", renderClientes],
     ];
     paneles.forEach(([nombre, fn]) => {
       try {
@@ -338,17 +446,94 @@
     });
   }
 
+  /* ---------- pedidos en tiempo real ---------- */
+  function renderPedidos() {
+    const tbody = $("#tbodyPedidos");
+    const lista = PEDIDOS || [];
+    const empty = $("#emptyPedidos");
+    if (empty) empty.hidden = lista.length > 0;
+    if (!tbody) return;
+    tbody.innerHTML = lista.map((p) => {
+      const st = ESTADOS_ADMIN[p.estado] || ESTADOS_ADMIN.nuevo;
+      const platos = (p.platos || []).map((d) => `${d.cantidad ?? 1}× ${d.plato}`).join(" · ");
+      const acciones = [];
+      if (!p.visto) acciones.push(`<button class="btn btn--cta-s" data-pvisto="${p.id}" type="button">✓ Ver</button>`);
+      if (p.estado === "nuevo") acciones.push(`<button class="btn btn--cta-s" data-pestado="${p.id}" data-estado="en_preparacion" type="button">→ Preparando</button>`);
+      if (p.estado === "en_preparacion") acciones.push(`<button class="btn btn--cta-s" data-pestado="${p.id}" data-estado="listo" type="button">→ Listo</button>`);
+      if (p.estado === "listo") acciones.push(`<button class="btn btn--cta-s" data-pestado="${p.id}" data-estado="entregado" type="button">→ Entregado</button>`);
+      if (p.estado === "entregado") acciones.push(`<span class="tag tag--ok">✔ Completado</span>`);
+      const hora = p.creado ? new Date(p.creado).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }) : "";
+      return `
+        <tr${p.visto ? "" : ' style="background:#fff4e6"'}>
+          <td><strong>#${p.numero_orden}</strong><br><small style="color:var(--tinta-suave)">${hora}</small></td>
+          <td><strong>${p.cliente_nombre}</strong><br><small style="color:var(--tinta-suave)">${p.cliente_cedula}</small></td>
+          <td style="font-size:.85rem">${platos || "—"}</td>
+          <td class="num"><strong>${MONEDA} ${formatear(p.total)}</strong></td>
+          <td><span class="tag ${st.clase}">${st.texto}</span></td>
+          <td><div style="display:flex;gap:6px;flex-wrap:wrap">${acciones.join("")}</div></td>
+        </tr>`;
+    }).join("");
+  }
+
+  async function cargarPedidos() {
+    try {
+      const res = await fetch("/api/admin/pedidos");
+      if (res.status === 401) { toggleUI(false); detenerRefresco(); abrirAcceso(); return; }
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      PEDIDOS = data.pedidos || [];
+      const nuevos = PEDIDOS.filter((p) => !p.visto).length;
+      const badge = $("#navPedidosNuevos");
+      if (badge) {
+        badge.hidden = nuevos === 0;
+        badge.textContent = nuevos;
+      }
+      renderPedidos();
+    } catch (err) {
+      console.warn("No se pudieron cargar los pedidos", err);
+    }
+  }
+
+  async function marcarPedidoVisto(id) {
+    try {
+      await fetch("/api/admin/pedidos/visto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: Number(id) }),
+      });
+      cargarPedidos();
+    } catch (err) { console.error(err); }
+  }
+
+  async function cambiarEstadoPedido(id, estado) {
+    try {
+      const res = await fetch("/api/admin/pedidos/estado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: Number(id), estado }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Error");
+      cargarPedidos();
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo actualizar el estado del pedido.");
+    }
+  }
+
   /* ---------- carga ---------- */
   async function cargarDatosAdmin() {
     const res = await fetch("/api/admin/datos");
     if (res.status === 401) {
       toggleUI(false);
+      abrirAcceso();
       throw new Error("Sesión expirada");
     }
     if (!res.ok) throw new Error(res.status);
     DATA = await res.json();
     toggleUI(true);
     renderPaneles();
+    cargarPedidos();
     const activa = document.querySelector("#dashboard .admin-vista.activa");
     mostrarVistaAdmin(activa ? activa.dataset.vista : "resumen");
     iniciarRefresco();
@@ -358,7 +543,7 @@
   async function cargarDatosSoft() {
     try {
       const res = await fetch("/api/admin/datos");
-      if (res.status === 401) { toggleUI(false); detenerRefresco(); return; }
+      if (res.status === 401) { toggleUI(false); detenerRefresco(); abrirAcceso(); return; }
       if (!res.ok) throw new Error(res.status);
       DATA = await res.json();
       renderPaneles();
@@ -371,7 +556,9 @@
     if (refrescoTimer) return;
     refrescoTimer = setInterval(async () => {
       const vistaActiva = document.querySelector("#dashboard .admin-vista.activa");
-      if (vistaActiva && vistaActiva.dataset.vista === "inventario") await cargarDatosSoft();
+      const vista = vistaActiva && vistaActiva.dataset.vista;
+      if (vista === "inventario" || vista === "avisos") await cargarDatosSoft();
+      cargarPedidos();
     }, 5000);
   }
 
@@ -385,50 +572,23 @@
       const res = await fetch("/api/sesion");
       const data = await res.json();
       if (data.admin) await cargarDatosAdmin();
-      else toggleUI(false);
+      else {
+        toggleUI(false);
+        abrirAcceso();
+      }
     } catch (err) {
       console.error(err);
       toggleUI(false);
+      abrirAcceso();
     }
   }
 
   /* ---------- eventos ---------- */
   function enlazar() {
-    $("#formLogin").addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      const msg = $("#loginMsg");
-      msg.hidden = true;
-      try {
-        const res = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usuario: $("#inUsuario").value, password: $("#inPassword").value }),
-        });
-        const data = await res.json();
-        if (!data.ok) {
-          msg.textContent = data.error || "Credenciales inválidas.";
-          msg.hidden = false;
-          return;
-        }
-        $("#inPassword").value = "";
-        await cargarDatosAdmin();
-      } catch (err) {
-        msg.textContent = "Error de conexión.";
-        msg.hidden = false;
-      }
-    });
+    $("#btnIngresar").addEventListener("click", abrirAcceso);
 
-    $("#btnLogout").addEventListener("click", async () => {
-      await fetch("/api/logout", { method: "POST" });
-      DATA = null;
-      detenerRefresco();
-      invFiltro = "";
-      recFiltro = "";
-      const bInv = $("#invBuscar");
-      if (bInv) bInv.value = "";
-      const bRec = $("#recBuscar");
-      if (bRec) bRec.value = "";
-      toggleUI(false);
+    $("#btnLogout").addEventListener("click", () => {
+      if (window.GCAuth) window.GCAuth.cerrarSesion();
     });
 
     const invBuscar = $("#invBuscar");
@@ -447,6 +607,17 @@
       });
     }
 
+    const rescBuscar = $("#rescBuscar");
+    if (rescBuscar) {
+      rescBuscar.addEventListener("input", (ev) => {
+        rescFiltro = ev.target.value;
+        renderPropuestas();
+      });
+    }
+
+    const btnSemana = $("#btnGenerarSemana");
+    if (btnSemana) btnSemana.addEventListener("click", generarBannersSemana);
+
     document.querySelectorAll(".admin-nav__btn").forEach((btn) =>
       btn.addEventListener("click", () => mostrarVistaAdmin(btn.dataset.vista))
     );
@@ -455,6 +626,14 @@
     $("#overlay").addEventListener("click", cerrarModal);
 
     document.addEventListener("click", (ev) => {
+      const pVisto = ev.target.closest("[data-pvisto]");
+      if (pVisto) { marcarPedidoVisto(pVisto.dataset.pvisto); return; }
+      const pEstado = ev.target.closest("[data-pestado]");
+      if (pEstado) { cambiarEstadoPedido(pEstado.dataset.pestado, pEstado.dataset.estado); return; }
+
+      const gBanner = ev.target.closest("[data-gbanner]");
+      if (gBanner) { generarBanner(gBanner.dataset.gbanner); return; }
+
       const recetaBtn = ev.target.closest("[data-receta]");
       if (recetaBtn) {
         const especiales = Object.values(DATA.contenido.especial || {});
@@ -512,6 +691,54 @@
         return;
       }
     });
+  }
+
+  async function generarBanner(plato) {
+    try {
+      const res = await fetch("/api/admin/generar-banner", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plato }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Error");
+      if (data.guardado) {
+        await cargarDatosAdmin();
+        mostrarVistaAdmin("anuncios");
+        alert(`Banner generado para "${plato}" y publicado en la galería. 🎨`);
+      } else {
+        abrirModalContenido(`<span class="badge badge--hero">🎨 Vista previa del banner</span><h3 style="margin-top:14px">${plato}</h3>${data.html}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo generar el banner.");
+    }
+  }
+
+  async function generarBannersSemana() {
+    const msg = $("#msgGenerarSemana");
+    try {
+      const res = await fetch("/api/admin/generar-banners-semana", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Error");
+      if (msg) {
+        msg.hidden = false;
+        msg.className = "auth__msg auth__msg--ok";
+        msg.textContent = data.mensaje;
+      }
+      await cargarDatosAdmin();
+    } catch (err) {
+      console.error(err);
+      if (msg) {
+        msg.hidden = false;
+        msg.className = "auth__msg auth__msg--err";
+        msg.textContent = "No se pudieron generar los banners de la semana.";
+      }
+    }
   }
 
   async function cambiarVisibilidad(tipo, id, ocultar) {
