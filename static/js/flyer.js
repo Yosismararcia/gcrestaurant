@@ -203,6 +203,10 @@
     descargarFlyer(ar.url, ar.file.name);
     if (app === "whatsapp") {
       window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank", "noopener");
+    } else if (app === "facebook") {
+      window.open(
+        "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(urlPagina) + "&quote=" + encodeURIComponent(texto),
+        "_blank", "noopener");
     } else if (app === "telegram") {
       window.open(
         "https://t.me/share/url?url=" + encodeURIComponent(urlPagina) + "&text=" + encodeURIComponent(texto),
@@ -232,6 +236,7 @@
         <div class="flyer-acciones">
           <a class="btn btn--primary btn--cta-s" href="${url}" download="flyer-${norm(p.plato)}.png">⬇️ Descargar PNG</a>
           <button class="btn btn--cta-s" data-app-share="whatsapp" type="button">🟢 WhatsApp</button>
+          <button class="btn btn--cta-s" data-app-share="facebook" type="button">📘 Facebook</button>
           <button class="btn btn--cta-s" data-app-share="instagram" type="button">📸 Instagram</button>
           <button class="btn btn--cta-s" data-app-share="telegram" type="button">✈️ Telegram</button>
         </div>`;

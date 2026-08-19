@@ -20,8 +20,8 @@
     </a>
     <nav class="nav" aria-label="Principal">
       <a href="#menu" data-nav data-vista="menu">Menú</a>
-      <a href="#promociones" data-nav data-vista="promociones">Promociones</a>
-      <a href="#especial" data-nav data-vista="especial">Especial del Día</a>
+      <a href="#promociones" data-nav data-vista="promociones">Promos y Especiales</a>
+      <a href="#recetas" data-nav data-vista="recetas">Aprende y Cocina</a>
       <a href="#comentarios" data-nav data-vista="comentarios">Comentarios</a>
       <a href="#pedidos" data-nav data-vista="pedidos">Mis pedidos</a>
     </nav>
@@ -57,8 +57,7 @@
           y transforma los insumos por vencer en un <strong>Especial del Día</strong>. Menos mermas, más margen.
         </p>
         <div class="hero__cta">
-          <a href="#promociones" data-vista="promociones" class="btn btn--primary">Ver promociones</a>
-          <a href="#especial" data-vista="especial" class="btn btn--ghost">Ver el Especial del Día</a>
+          <a href="#promociones" data-vista="promociones" class="btn btn--primary">Ver Especiales de Hoy</a>
         </div>
         <div class="hero__stats" id="heroStats" aria-live="polite">
           <div class="stat"><span class="stat__num" id="statPromos">–</span><span class="stat__label">Promociones</span></div>
@@ -66,16 +65,6 @@
           <div class="stat"><span class="stat__num" id="statComentarios">–</span><span class="stat__label">Comentarios</span></div>
         </div>
       </div>
-    </div>
-    <div class="container band" id="bandDestacadas">
-      <div class="band__head">
-        <div>
-          <p class="kicker">Lo que más se pide · esta semana</p>
-          <h2 class="band__title">Promos destacadas del día</h2>
-        </div>
-        <span class="band__aviso">Se renuevan cada semana 🎡</span>
-      </div>
-      <div class="band__track" id="gridDestacadas" aria-live="polite"></div>
     </div>
   </section>
 
@@ -86,41 +75,34 @@
         <h2 class="section__title">Menú</h2>
         <p class="section__sub">Cocina internacional y postres: conoce todo lo que preparamos para ti.</p>
       </div>
+      <div class="toolbar">
+        <input type="search" id="buscador" class="input" placeholder="🔍  Buscar platillo por nombre…" aria-label="Buscar platillo" autocomplete="off">
+      </div>
       <div class="grid grid--promos" id="gridMenu" aria-live="polite"></div>
+      <p class="empty" id="emptyMenu" hidden>No hay platillos que coincidan con tu búsqueda.</p>
     </div>
   </section>
 
   <section class="section section--crema vista" id="promociones" data-vista="promociones">
     <div class="container">
       <div class="section__head">
-        <p class="kicker">Listo para pedir</p>
-        <h2 class="section__title">Promociones activas</h2>
-        <p class="section__sub">Elige tus platillos favoritos con descuento y agrégalos al pedido.</p>
+        <p class="kicker">Rescatamos lo más fresco · todos los días</p>
+        <h2 class="section__title">Especiales y Promos del Día</h2>
+        <p class="section__sub">El Especial del Día y los platos que más se piden esta semana. Toca cualquier tarjeta para ver el detalle y pedirlo. ¿Buscas más platillos? Visita el Menú.</p>
       </div>
-      <div class="toolbar">
-        <input type="search" id="buscador" class="input" placeholder="Buscar platillo, categoría o ingrediente…" aria-label="Buscar promociones">
-        <select id="filtroCategoria" class="select" aria-label="Filtrar por categoría">
-          <option value="">Todas las categorías</option>
-        </select>
-      </div>
-      <div class="grid grid--promos" id="gridPromos" aria-live="polite"></div>
-      <p class="empty" id="emptyPromos" hidden>No hay platillos que coincidan con tu búsqueda.</p>
+      <div class="band__track band__track--grid" id="gridUnificado" aria-live="polite"></div>
     </div>
   </section>
 
-  <section class="section section--tinta vista" id="especial" data-vista="especial">
+  <section class="section section--crema vista" id="recetas" data-vista="recetas">
     <div class="container">
-      <div class="especial">
-        <div class="especial__badge">⚡ Rescatamos lo más fresco</div>
-        <div>
-          <p class="kicker">El plato del día</p>
-          <h2 class="section__title section__title--claro">Especial del Día</h2>
-          <p class="section__sub section__sub--claro" id="especialResumen">
-            Nuestro chef convierte lo más fresco en un plato único. Disponible hasta agotar stock. 🥬→🍽️
-          </p>
-        </div>
-        <div class="grid grid--especial" id="gridEspecial" aria-live="polite"></div>
+      <div class="section__head">
+        <p class="kicker">Entretenimiento culinario</p>
+        <h2 class="section__title">Aprende y Cocina en Casa</h2>
+        <p class="section__sub">Recetas fáciles seleccionadas y publicadas cada día por nuestro chef. Cocina, comparte y cuéntanos cómo te fue.</p>
       </div>
+      <div class="grid grid--promos" id="gridRecetas" aria-live="polite"></div>
+      <p class="empty" id="emptyRecetas" hidden>Hoy aún no hay recetas publicadas. ¡Vuelve pronto para aprender a cocinar! 👨‍🍳</p>
     </div>
   </section>
 
@@ -183,7 +165,7 @@
     <button class="drawer__close" id="btnCerrarCarrito" type="button" aria-label="Cerrar">×</button>
   </div>
   <div class="drawer__body" id="drawerBody">
-    <p class="empty">Aún no elegiste platillos. Toca <b>+</b> en una promoción. 🍽️</p>
+    <p class="empty">Aún no elegiste platillos. Toca una tarjeta y confirma tu pedido. 🍽️</p>
   </div>
   <div class="drawer__foot">
     <div class="totales" id="totalesPedido">
@@ -202,11 +184,11 @@
 <div class="modal" id="modalEspecial" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
   <div class="modal__card">
     <button class="modal__close" id="btnCerrarModal" type="button" aria-label="Cerrar">×</button>
-    <p class="kicker">Receta propuesta por el Chef Zero-Waste</p>
-    <h3 id="modalTitulo">Especial del Día</h3>
     <div id="modalContenido"></div>
   </div>
 </div>
+
+<div class="modal" id="modalAnuncio" hidden role="dialog" aria-modal="true" aria-labelledby="modalAnuncioTitulo"></div>
 
 <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>

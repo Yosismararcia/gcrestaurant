@@ -1,0 +1,54 @@
+{
+  "recetas": [
+    {
+      "id": "receta-1",
+      "titulo": "Ceviche de Camarones Express",
+      "imagen": "https://commons.wikimedia.org/wiki/Special:FilePath/Cebiche_de_corvina.JPG?width=800",
+      "tiempo_min": 15,
+      "porciones": 2,
+      "ingredientes": ["Camarones", "Limon", "Cebolla morada", "Aji limo", "Cilantro"],
+      "pasos": [
+        "Exprime el limón y mezcla con los camarones bien limpios.",
+        "Agrega cebolla morada en juliana fina, ají y cilantro picado.",
+        "Deja marinar 5 minutos y sirve frío. Acompaña con choclo o cancha.",
+        "¡Listo en minutos para disfrutar en casa!"
+      ],
+      "publicada_hoy": true,
+      "creado": "2026-08-19T10:00:00.000000"
+    },
+    {
+      "id": "receta-2",
+      "titulo": "Crema de Tomate y Albahaca",
+      "imagen": "https://commons.wikimedia.org/wiki/Special:FilePath/Tomato_soup%2C_plant-based_(44040252791).jpg?width=800",
+      "tiempo_min": 20,
+      "porciones": 4,
+      "ingredientes": ["Tomate", "Crema de leche", "Cebolla", "Albahaca", "Sal", "Pimienta"],
+      "pasos": [
+        "Sofríe la cebolla en una olla hasta que esté transparente.",
+        "Agrega los tomates pelados y cocina 10 minutos a fuego medio.",
+        "Licúa todo con la crema de leche y la albahaca.",
+        "Sazona con sal y pimienta. Sirve caliente con pan tostado.",
+        "Recuerda visitar el restaurante para probar nuestra Sopa de Tomate con crujientes de ciabatta."
+      ],
+      "publicada_hoy": false,
+      "creado": "2026-08-19T10:30:00.000000"
+    },
+    {
+      "id": "receta-3",
+      "titulo": "Tacos de Pollo al Pastor",
+      "imagen": "https://commons.wikimedia.org/wiki/Special:FilePath/Tacos-al-Pastor.jpg?width=800",
+      "tiempo_min": 25,
+      "porciones": 3,
+      "ingredientes": ["Pollo", "Piña", "Cebolla morada", "Cilantro", "Tortilla de maíz"],
+      "pasos": [
+        "Marina el pollo con especias al pastor durante 10 minutos.",
+        "Dora el pollo en sartén bien caliente junto con la piña en cubos.",
+        "Arma los tacos con tortilla de maíz, cebolla morada y cilantro fresco.",
+        "Acompaña con tu salsa favorita. ¡Sabor mexicano en casa!",
+        "¿Con antojo? Pide los Tacos al Pastor del restaurante con -25% los fines de semana."
+      ],
+      "publicada_hoy": true,
+      "creado": "2026-08-19T11:00:00.000000"
+    }
+  ]
+}

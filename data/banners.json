@@ -81,12 +81,44 @@
       "fecha": "2026-08-16T16:13:34"
     },
     {
+      "id": "banner-sushi-roll-de-salmon",
+      "titulo": "Sushi Roll de Salmón",
+      "archivo": "banners/banner-sushi-roll-de-salmon.html",
+      "tipo": "banner",
+      "nota": "-20% · Japón",
+      "fecha": "2026-08-18T03:11:09"
+    },
+    {
+      "id": "banner-burger-y-papas",
+      "titulo": "Burger y Papas",
+      "archivo": "banners/banner-burger-y-papas.html",
+      "tipo": "banner",
+      "nota": "-25% · EEUU",
+      "fecha": "2026-08-19T08:45:33"
+    },
+    {
+      "id": "banner-tacos-al-pastor",
+      "titulo": "Tacos al Pastor",
+      "archivo": "banners/banner-tacos-al-pastor.html",
+      "tipo": "banner",
+      "nota": "-25% · México · Más vendido esta semana",
+      "fecha": "2026-08-19T11:09:58"
+    },
+    {
+      "id": "banner-pad-thai-de-pollo",
+      "titulo": "Pad Thai de Pollo",
+      "archivo": "banners/banner-pad-thai-de-pollo.html",
+      "tipo": "banner",
+      "nota": "-20% · Tailandia · Más vendido esta semana",
+      "fecha": "2026-08-19T11:09:58"
+    },
+    {
       "id": "banner-ceviche-de-camarones",
       "titulo": "Ceviche de Camarones",
       "archivo": "banners/banner-ceviche-de-camarones.html",
       "tipo": "banner",
       "nota": "-15% · Especial del Mar",
-      "fecha": "2026-08-18T01:18:55"
+      "fecha": "2026-08-19T11:10:27"
     }
   ]
 }

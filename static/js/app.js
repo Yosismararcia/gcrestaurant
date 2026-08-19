@@ -24,6 +24,7 @@
   const ESTADO = {
     promociones: [],
     banners: [],
+    recetas: [],
     comentarios: [],
     contenido: { copy: {}, especial: {} },
     resumen: {},
@@ -36,7 +37,7 @@
     "especial del mar": "🐟", "japón": "🍣", "méxico": "🌮", "italia": "🍝",
     "españa": "🥘", "eeuu": "🍔", "tailandia": "🍜", "india": "🍛",
     "light": "🥗", "clásicos": "🍗", "sopas": "🍲", "bebidas": "🍹",
-    "postres": "🍰",
+    "postres": "🍰", "zero waste": "🌿",
   };
 
   let starSelector = null;
@@ -95,22 +96,36 @@
     }
   }
 
-  /* ---------- render: promociones ---------- */
-  function renderPromos(filtro = "") {
-    const grid = $("#gridPromos");
-    const filtroCategoria = $("#filtroCategoria").value;
-    const lista = ESTADO.promociones.filter((p) => {
-      const texto = `${p.plato} ${p.categoria} ${p.descripcion} ${p.dias}`.toLowerCase();
-      const coincideTexto = texto.includes(filtro.toLowerCase());
-      const coincideCat = !filtroCategoria || p.categoria === filtroCategoria;
-      return coincideTexto && coincideCat;
-    });
-
-    $("#emptyPromos").hidden = lista.length > 0;
-    grid.innerHTML = lista.map((p, idx) => tarjetaPromo(p, idx)).join("");
+  /* ---------- especial + destacadas unificadas (Especial SIEMPRE primero) ---------- */
+  function especialActual() {
+    return Object.values(ESTADO.contenido.especial || {})[0] || null;
   }
 
-  function tarjetaPromo(p, idx) {
+  function tarjetaFeat(e, idx) {
+    const p = ESTADO.promociones.find((x) => norm(x.plato) === norm(e.plato)) || {};
+    const conPrecio = Number.isFinite(p.precio_final) && Number.isFinite(p.precio_base);
+    const precioHtml = conPrecio
+      ? `<span class="band__precio">${MONEDA} ${formatear(p.precio_final)} <s>${MONEDA} ${formatear(p.precio_base)}</s></span>`
+      : `<span class="band__precio">${MONEDA} —</span>`;
+    const descripcion = e.descripcion_larga || p.descripcion ||
+      `Elaborado con lo más fresco del día: ${(e.inspirado_en || []).join(", ")}.`;
+    return `
+      <article class="card card--feat reveal" style="animation-delay:${idx * 80}ms" data-detalle="${e.plato}">
+        <div class="card__img">${topDeTarjeta(e, "🐟")}</div>
+        <div class="card__body">
+          <span class="badge badge--dia">⚡ Especial del Día · Zero Waste</span>
+          <h3 class="card__title">${tituloBonito(e.plato)}</h3>
+          <p class="card__text">${descripcion}</p>
+          <div class="card__meta"><span>🌿 ${(e.inspirado_en || []).slice(0, 3).join(", ")}</span></div>
+          <div class="card__foot">
+            ${precioHtml}
+            <button class="btn btn--primary btn--cta-s" data-detalle="${e.plato}" type="button">Ver detalle</button>
+          </div>
+        </div>
+      </article>`;
+  }
+
+  function tarjetaUnificada(p, idx) {
     const conPrecio = Number.isFinite(p.precio_final) && Number.isFinite(p.precio_base);
     const precioHtml = conPrecio
       ? `<div>
@@ -118,118 +133,165 @@
            <span class="card__precio">${MONEDA} ${formatear(p.precio_final)}</span>
          </div>`
       : `<span class="card__precio">${MONEDA} —</span>`;
-    const copiaLista = ESTADO.contenido.copy[norm(p.plato)];
-    const copyBtn = copiaLista
-      ? `<span class="card__copy" data-copy="${p.plato}" role="button" title="Ver copy de Instagram">📣 Copy IG listo</span>`
+    const motivo = p.razon
+      ? `<span class="card__razon">${p.razon === "Variedad de la semana" ? "🎡" : p.razon === "Rescata frescura" ? "🌿" : "🏆"} ${p.razon}</span>`
       : "";
-    const toolsBtn = "";
     return `
-      <article class="card reveal" style="animation-delay:${idx * 60}ms">
+      <article class="card card--carousel reveal" style="animation-delay:${idx * 60}ms" data-detalle="${p.plato}">
         <div class="card__img">
           ${topDeTarjeta(p, emojiPorCategoria(p.categoria))}
           <span class="badge badge--descuento">-${p.descuento}%</span>
           <span class="badge badge--categoria">${p.categoria}</span>
         </div>
         <div class="card__body">
-          <h3 class="card__title">${copiaLista ? "📣 " : ""}${p.plato}</h3>
+          <h3 class="card__title">${p.plato}</h3>
           <p class="card__text">${p.descripcion}</p>
-          <div class="card__meta"><span>🗓️ ${p.dias}</span><span>${emojiPorCategoria(p.categoria)} ${p.categoria}</span></div>
-          ${copyBtn}
-          ${toolsBtn}
+          ${motivo}
           <div class="card__foot">
             ${precioHtml}
-            <button class="btn btn--primary btn--cta-s" data-agregar="${p.plato}" type="button">+ Pedir</button>
+            <button class="btn btn--primary btn--cta-s" data-detalle="${p.plato}" type="button">Ver detalle</button>
           </div>
         </div>
       </article>`;
   }
 
-  /* ---------- destacadas (lo más pedido + rescates, rotación semanal) ---------- */
-  function tarjetaDestacada(p, idx) {
-    const precio = Number.isFinite(p.precio_final) && Number.isFinite(p.precio_base)
-      ? `<span class="band__precio">${MONEDA} ${formatear(p.precio_final)} <s>${MONEDA} ${formatear(p.precio_base)}</s></span>`
-      : `<span class="band__precio">${MONEDA} —</span>`;
-    const motivo = p.razon
-      ? `<span class="band__tag">${p.razon === "Variedad de la semana" ? "🎡" : p.razon === "Rescata frescura" ? "🌿" : "🏆"} ${p.razon}</span>`
-      : "";
-    return `
-      <article class="band__card reveal" style="animation-delay:${idx * 60}ms">
-        <span class="band__off">-${p.descuento}%</span>
-        <span class="band__emoji">${emojiPorCategoria(p.categoria)}</span>
-        <h3 class="band__titulo">${p.plato}</h3>
-        <p class="band__texto">${p.descripcion}</p>
-        <div class="band__pie">
-          <span>${p.categoria}</span>
-          ${precio}
-        </div>
-        ${motivo}
-        <button class="btn btn--primary btn--cta-s" data-agregar="${p.plato}" type="button">+ Pedir</button>
-      </article>`;
-  }
-
-  function renderDestacadas() {
-    const grid = $("#gridDestacadas");
+  function renderUnificado() {
+    const grid = $("#gridUnificado");
     if (!grid) return;
-    const lista = (ESTADO.destacadas || []).slice(0, 6);
-    grid.innerHTML = lista.map((p, idx) => tarjetaDestacada(p, idx)).join("");
-    const band = $("#bandDestacadas");
-    if (band) band.hidden = lista.length === 0;
+    const e = especialActual();
+    const normE = e ? norm(e.plato) : null;
+    const destacadas = (ESTADO.destacadas || [])
+      .filter((d) => !normE || norm(d.plato) !== normE)
+      .slice(0, 6);
+    const cartas = [];
+    if (e) cartas.push(tarjetaFeat(e, 0));
+    destacadas.forEach((d, i) => cartas.push(tarjetaUnificada(d, e ? i + 1 : i)));
+    grid.innerHTML = cartas.join("") ||
+      `<p class="empty">Hoy aún no tenemos especiales ni destacadas. Vuelve en un momento. 🌱</p>`;
   }
 
-  /* ---------- filtros ---------- */
-  function poblarCategorias() {
-    const sel = $("#filtroCategoria");
-    const mapa = {};
-    ESTADO.promociones.forEach((p) => { mapa[p.categoria] = true; });
-    Object.keys(mapa).sort().forEach((c) => {
-      const opt = document.createElement("option");
-      opt.value = c; opt.textContent = c;
-      sel.appendChild(opt);
-    });
-  }
+  /* ---------- modal de detalle + anuncio del especial ---------- */
+  let detallePlato = null;
+  let detalleQty = 1;
 
-  /* ---------- render: especial del día (sin receta para clientes) ---------- */
-  function renderEspecial() {
-    const grid = $("#gridEspecial");
-    const guardados = Object.values(ESTADO.contenido.especial || {});
-    if (guardados.length) {
-      grid.innerHTML = guardados.map((e, i) => tarjetaEspecialPublic(e, i)).join("");
-      return;
+  function imagenGrande(p, emoji, clase = "detalle__img") {
+    const fallback = `<span class="detalle__emoji">${emoji}</span>`;
+    if (p && p.imagen) {
+      return `
+        <div class="${clase}">
+          <img class="detalle__foto" src="${imgProxy(p.imagen)}" alt="${p.plato || ""}" loading="eager"
+               onerror="this.remove(); this.nextElementSibling.hidden = false;">
+          ${fallback}
+        </div>`;
     }
-    const placeholder = {
-      plato: "El plato sorpresa del día",
-      imagen: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&auto=format&fit=crop&q=70",
-    };
-    grid.innerHTML = `
-      <article class="card card--especial reveal">
-        <div class="card__img">${topDeTarjeta(placeholder, "🍳")}</div>
-        <div class="card__body">
-          <span class="badge badge--dia">Hoy</span>
-          <h3 class="card__title">El plato sorpresa del día</h3>
-          <p class="card__text">Pregunta por la oferta del día: nuestro chef lo prepara con lo más fresco. ¡Hasta agotar stock!</p>
-        </div>
-      </article>`;
+    return `<div class="${clase}">${fallback}</div>`;
   }
 
-  function tarjetaEspecialPublic(e, idx) {
-    return `
-      <article class="card card--especial reveal" style="animation-delay:${idx * 80}ms">
-        <div class="card__img">${topDeTarjeta(e, "🐟")}</div>
-        <div class="card__body">
-          <span class="badge badge--dia">⚡ Hoy</span>
-          <h3 class="card__title">${tituloBonito(e.plato)}</h3>
-          <p class="card__text">Elaborado con lo más fresco del día: ${(e.inspirado_en || []).slice(0, 3).join(", ")}.</p>
-          <p class="card__text" style="opacity:.75;font-size:.8rem">Disponible hasta agotar stock.</p>
-        </div>
-      </article>`;
+  function encontrarPromo(plato) {
+    return ESTADO.promociones.find((x) => norm(x.plato) === norm(plato)) || null;
   }
 
-  /* ---------- render: menú (precios regulares) ---------- */
+  function abrirDetallePlato(plato) {
+    const p = encontrarPromo(plato);
+    if (!p) return;
+    const e = especialActual() && norm(especialActual().plato) === norm(plato) ? especialActual() : null;
+    detallePlato = plato;
+    detalleQty = 1;
+    $("#modalAnuncio").hidden = true;
+    pintarDetalle(p, e);
+    $("#modalEspecial").hidden = false;
+    $("#overlay").hidden = false;
+  }
+
+  function pintarDetalle(p, e) {
+    const conPrecio = Number.isFinite(p.precio_final) && Number.isFinite(p.precio_base);
+    const precioHtml = conPrecio
+      ? `<div class="detalle__precios">
+           <span class="detalle__precio">${MONEDA} ${formatear(p.precio_final)}</span>
+           <s class="detalle__precio-base">${MONEDA} ${formatear(p.precio_base)}</s>
+           <span class="badge badge--descuento">-${p.descuento}%</span>
+         </div>`
+      : `<span class="detalle__precio">${MONEDA} —</span>`;
+    const badge = e
+      ? `<span class="badge badge--dia">⚡ Especial del Día · Zero Waste</span>`
+      : `<span class="badge badge--categoria">${p.categoria}</span>`;
+    const recetaHtml = e && e.receta
+      ? `<div class="receta detalle__receta"><b>Preparación del chef:</b>\n${e.receta}</div>`
+      : "";
+    const inspiradoHtml = e && (e.inspirado_en || []).length
+      ? `<p class="detalle__inspirado"><b>Inspirado en:</b> ${e.inspirado_en.join(", ")}</p>`
+      : "";
+    const descripcion = p.descripcion_larga || p.descripcion;
+    $("#modalContenido").innerHTML = `
+      ${imagenGrande(e || p, emojiPorCategoria(p.categoria))}
+      <span class="detalle__head">
+        ${badge}
+        <span class="detalle__dias">🗓️ ${p.dias}</span>
+      </span>
+      <h3 class="modal__title">${e ? tituloBonito(e.plato) : p.plato}</h3>
+      ${precioHtml}
+      <p class="detalle__texto">${descripcion}</p>
+      ${inspiradoHtml}
+      ${recetaHtml}
+      <div class="detalle__pedido">
+        <div class="detalle__stepper" role="group" aria-label="Cantidad">
+          <button class="item-pedido__c" data-detalle-restar type="button">−</button>
+          <b class="detalle__qty" id="detalleQty">1</b>
+          <button class="item-pedido__c" data-detalle-sumar type="button">+</button>
+        </div>
+        <button class="btn btn--primary" data-detalle-confirmar type="button">Añadir <b id="detalleQtyBtn">1</b> al pedido</button>
+      </div>`;
+  }
+
+  function mostrarAnuncio() {
+    if (sessionStorage.getItem("gc_anuncio_visto")) return;
+    const e = especialActual();
+    if (!e) return;
+    const p = encontrarPromo(e.plato);
+    setTimeout(() => {
+      const conPrecio = Number.isFinite(p.precio_final);
+      const precioHtml = conPrecio
+        ? `<span class="anuncio__precio">${MONEDA} ${formatear(p.precio_final)} <s>${MONEDA} ${formatear(p.precio_base)}</s></span>`
+        : "";
+      const descripcion = e.descripcion_larga || (p && p.descripcion_larga) ||
+        `Elaborado con lo más fresco del día: ${(e.inspirado_en || []).join(", ")}.`;
+      $("#modalAnuncio").innerHTML = `
+        <div class="modal__card anuncio">
+          <button class="modal__close" data-cerrar-anuncio type="button" aria-label="Cerrar">×</button>
+          ${imagenGrande(e, "🐟", "anuncio__img")}
+          <span class="badge badge--dia">⚡ Especial del Día · Zero Waste</span>
+          <h3 class="modal__title" id="modalAnuncioTitulo">${tituloBonito(e.plato)}</h3>
+          ${precioHtml}
+          <p class="detalle__texto">${descripcion}</p>
+          <p class="anuncio__foot">
+            <button class="btn btn--primary" data-anuncio-pedir type="button">Añadir al pedido</button>
+            <button class="btn btn--ghost" data-cerrar-anuncio type="button">Ahora no</button>
+          </p>
+        </div>`;
+      $("#modalAnuncio").hidden = false;
+      $("#overlay").hidden = false;
+    }, 900);
+  }
+
+  function cerrarAnuncio() {
+    $("#modalAnuncio").hidden = true;
+    sessionStorage.setItem("gc_anuncio_visto", "1");
+    if ($("#modalEspecial").hidden && !$("#drawerCarrito").classList.contains("open")) $("#overlay").hidden = true;
+  }
+
+  /* ---------- render: menú (precios regulares, con buscador) ---------- */
   function renderMenu() {
     const grid = $("#gridMenu");
-    const lista = ESTADO.promociones.slice();
+    const q = ($("#buscador").value || "").trim().toLowerCase();
+    const lista = q
+      ? ESTADO.promociones.filter((p) => (p.plato || "").toLowerCase().includes(q))
+      : ESTADO.promociones.slice();
+    const empty = $("#emptyMenu");
+    if (empty) empty.hidden = lista.length > 0;
     if (!lista.length) {
-      grid.innerHTML = `<article class="card"><div class="card__body"><p class="empty">El menú aún no está disponible. Vuelve pronto.</p></div></article>`;
+      grid.innerHTML = q
+        ? ""
+        : `<article class="card"><div class="card__body"><p class="empty">El menú aún no está disponible. Vuelve pronto.</p></div></article>`;
       return;
     }
     grid.innerHTML = lista.map((p, idx) => {
@@ -237,7 +299,7 @@
         ? `<span class="card__precio">${MONEDA} ${formatear(p.precio_base)}</span>`
         : `<span class="card__precio">${MONEDA} —</span>`;
       return `
-      <article class="card reveal" style="animation-delay:${idx * 40}ms">
+      <article class="card reveal" style="animation-delay:${idx * 40}ms" data-detalle="${p.plato}">
         <div class="card__img">
           ${topDeTarjeta(p, emojiPorCategoria(p.categoria))}
           <span class="badge badge--categoria">${p.categoria}</span>
@@ -248,7 +310,79 @@
           <div class="card__meta"><span>🗓️ ${p.dias}</span><span>${emojiPorCategoria(p.categoria)} ${p.categoria}</span></div>
           <div class="card__foot">
             ${precio}
-            <button class="btn btn--ghost btn--cta-s" data-ir-promo="${p.plato}" type="button">Ver promoción</button>
+            <button class="btn btn--primary btn--cta-s" data-detalle="${p.plato}" type="button">Ver detalle</button>
+          </div>
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  /* ---------- render: recetas fáciles (aprende y cocina en casa) ---------- */
+  const COMPARTIR_RECETA = {
+    whatsapp: (texto) => `https://wa.me/?text=${encodeURIComponent(texto)}`,
+    facebook: (texto, url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(texto)}`,
+    twitter: (texto) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}`,
+  };
+
+  async function copiarTexto(texto) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      return true;
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = texto; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e2) { ok = false; }
+      ta.remove();
+      return ok;
+    }
+  }
+
+  function textoReceta(r) {
+    const url = location.origin + "/cliente#recetas";
+    return [
+      `👨‍🍳 Aprende a cocinar: ${r.titulo}`,
+      `⏱️ En ${r.tiempo_min || 0} minutos · para ${r.porciones || 1} persona(s)`,
+      `🧺 Ingredientes: ${(r.ingredientes || []).join(", ")}`,
+      `🍴 Pasos: ${(r.pasos || []).join(" → ")}`,
+      ``,
+      `📍 Del menú de G&CRestaurant: ${url}`,
+      `#AprendeYCocina #GCRestaurant #RecetasFaciles`,
+    ].join("\n");
+  }
+
+  function renderRecetas() {
+    const grid = $("#gridRecetas");
+    const lista = ESTADO.recetas || [];
+    const empty = $("#emptyRecetas");
+    if (empty) empty.hidden = lista.length > 0;
+    if (!grid) return;
+    grid.innerHTML = lista.map((r, idx) => {
+      const urlPagina = location.origin + "/cliente#recetas";
+      const texto = textoReceta(r);
+      const imagen = r.imagen
+        ? `<img class="card__foto" src="${imgProxy(r.imagen)}" alt="${r.titulo}" loading="lazy"
+             onerror="this.remove(); this.nextElementSibling.hidden = false;">
+           <span class="card__emoji-fb card__emoji-fb--warm2" hidden>🍳</span>`
+        : `<span class="card__emoji-fb card__emoji-fb--warm2">🍳</span>`;
+      return `
+      <article class="card receta-card reveal" style="animation-delay:${idx * 60}ms">
+        <div class="card__img">${imagen}</div>
+        <div class="card__body">
+          <span class="badge badge--dia">👨‍🍳 Receta del día</span>
+          <h3 class="card__title">${r.titulo}</h3>
+          <div class="card__meta">
+            <span>⏱️ ${r.tiempo_min || 0} min</span>
+            <span>🍽️ ${r.porciones || 1} porc.</span>
+          </div>
+          <p class="card__text"><b>🧺 Ingredientes:</b> ${(r.ingredientes || []).join(", ")}.</p>
+          <ol class="receta__pasos">${(r.pasos || []).map((p) => `<li>${p}</li>`).join("")}</ol>
+          <div class="card__tools">
+            <a class="card__copy" href="${COMPARTIR_RECETA.whatsapp(texto)}" target="_blank" rel="noopener">🟢 WhatsApp</a>
+            <a class="card__copy" href="${COMPARTIR_RECETA.facebook(texto, urlPagina)}" target="_blank" rel="noopener">📘 Facebook</a>
+            <a class="card__copy" href="${COMPARTIR_RECETA.twitter(texto)}" target="_blank" rel="noopener">🐦 X</a>
+            <button class="card__copy" data-copiar-receta="${r.id}" type="button">🔗 Copiar</button>
           </div>
         </div>
       </article>`;
@@ -455,7 +589,8 @@
 
   function cerrarModal() {
     $("#modalEspecial").hidden = true;
-    $("#overlay").hidden = true;
+    $("#modalAnuncio").hidden = true;
+    if (!$("#drawerCarrito").classList.contains("open")) $("#overlay").hidden = true;
   }
 
   /* ---------- drawer ---------- */
@@ -485,9 +620,8 @@
   function renderTodo() {
     renderStats();
     renderMenu();
-    renderPromos($("#buscador").value);
-    renderEspecial();
-    renderDestacadas();
+    renderUnificado();
+    renderRecetas();
     renderCarrito();
   }
 
@@ -499,27 +633,11 @@
 
   /* ---------- eventos ---------- */
   function enlazar() {
-    document.addEventListener("click", (ev) => {
+    document.addEventListener("click", async (ev) => {
       const enlaceVista = ev.target.closest('a[data-vista]');
       if (enlaceVista) {
         ev.preventDefault();
         mostrarVista(enlaceVista.dataset.vista);
-        return;
-      }
-      const irPromo = ev.target.closest("[data-ir-promo]");
-      if (irPromo) {
-        $("#buscador").value = irPromo.dataset.irPromo;
-        renderPromos(irPromo.dataset.irPromo);
-        mostrarVista("promociones");
-        return;
-      }
-      const agregar = ev.target.closest("[data-agregar]");
-      if (agregar) {
-        const plato = agregar.dataset.agregar;
-        const k = norm(plato);
-        if (!ESTADO.carrito[k]) ESTADO.carrito[k] = { plato, qty: 0 };
-        sumar(ESTADO.carrito[k], 1);
-        ev.preventDefault();
         return;
       }
       const sumarBtn = ev.target.closest("[data-sumar]");
@@ -529,6 +647,7 @@
 
       const verCopy = ev.target.closest("[data-copy]");
       if (verCopy) {
+        ev.stopPropagation();
         const c = ESTADO.contenido.copy[norm(verCopy.dataset.copy)];
         if (c) {
           abrirModalContenido(`
@@ -536,6 +655,63 @@
             <h3 style="margin-top:14px">${verCopy.dataset.copy}</h3>
             <div class="receta">${c.texto}</div>
           `);
+        }
+        return;
+      }
+
+      const detalle = ev.target.closest("[data-detalle]");
+      if (detalle) {
+        abrirDetallePlato(detalle.dataset.detalle);
+        return;
+      }
+      const detalleSumar = ev.target.closest("[data-detalle-sumar]");
+      if (detalleSumar) {
+        detalleQty = Math.min(20, detalleQty + 1);
+        $("#detalleQty").textContent = detalleQty;
+        $("#detalleQtyBtn").textContent = detalleQty;
+        return;
+      }
+      const detalleRestar = ev.target.closest("[data-detalle-restar]");
+      if (detalleRestar) {
+        detalleQty = Math.max(1, detalleQty - 1);
+        $("#detalleQty").textContent = detalleQty;
+        $("#detalleQtyBtn").textContent = detalleQty;
+        return;
+      }
+      const detalleConfirmar = ev.target.closest("[data-detalle-confirmar]");
+      if (detalleConfirmar) {
+        const plato = detallePlato;
+        const k = norm(plato);
+        if (!ESTADO.carrito[k]) ESTADO.carrito[k] = { plato, qty: 0 };
+        sumar(ESTADO.carrito[k], detalleQty);
+        cerrarModal();
+        abrirCarrito();
+        return;
+      }
+      const anuncioPedir = ev.target.closest("[data-anuncio-pedir]");
+      if (anuncioPedir) {
+        const e = especialActual();
+        if (e) {
+          const k = norm(e.plato);
+          if (!ESTADO.carrito[k]) ESTADO.carrito[k] = { plato: e.plato, qty: 0 };
+          sumar(ESTADO.carrito[k], 1);
+        }
+        cerrarAnuncio();
+        abrirCarrito();
+        return;
+      }
+      const cerrarAnuncioBtn = ev.target.closest("[data-cerrar-anuncio]");
+      if (cerrarAnuncioBtn) {
+        cerrarAnuncio();
+        return;
+      }
+      const copiarReceta = ev.target.closest("[data-copiar-receta]");
+      if (copiarReceta) {
+        const r = (ESTADO.recetas || []).find((x) => String(x.id) === String(copiarReceta.dataset.copiarReceta));
+        if (r) {
+          const ok = await copiarTexto(textoReceta(r));
+          copiarReceta.textContent = ok ? "✅ Copiado" : "Copiar";
+          setTimeout(() => { copiarReceta.textContent = "🔗 Copiar"; }, 2200);
         }
         return;
       }
@@ -553,8 +729,8 @@
       if (window.GCAuth) window.GCAuth.abrir("login");
     });
     $("#overlay").addEventListener("click", () => { cierreCarrito(); cerrarModal(); });
-    $("#buscador").addEventListener("input", (ev) => renderPromos(ev.target.value));
-    $("#filtroCategoria").addEventListener("change", () => renderPromos($("#buscador").value));
+    const buscador = $("#buscador");
+    if (buscador) buscador.addEventListener("input", () => renderMenu());
 
     $("#navToggle").addEventListener("click", () => {
       document.querySelector(".nav").classList.toggle("open");
@@ -576,20 +752,21 @@
       const datos = await res.json();
       ESTADO.promociones = datos.promociones || [];
       ESTADO.banners = datos.banners || [];
+      ESTADO.recetas = datos.recetas || [];
       ESTADO.destacadas = datos.destacadas || [];
       ESTADO.comentarios = datos.comentarios || [];
       ESTADO.contenido = datos.contenido || { copy: {}, especial: {} };
       ESTADO.resumen = datos.resumen || {};
       ESTADO.sesion = datos.sesion || { autenticado: false, admin: false };
       renderUsuario();
-      poblarCategorias();
       renderTodo();
       renderComentarios();
+      mostrarAnuncio();
       cargarMisPedidos();
       setInterval(cargarMisPedidos, 5000);
       mostrarVista("inicio");
     } catch (err) {
-      $("#gridPromos").innerHTML = `<article class="card"><div class="card__body"><p class="empty">No se pudo conectar con el restaurante. Intenta de nuevo en unos segundos.</p></div></article>`;
+      $("#gridUnificado").innerHTML = `<article class="card"><div class="card__body"><p class="empty">No se pudo conectar con el restaurante. Intenta de nuevo en unos segundos.</p></div></article>`;
       reportarError(err);
       console.error(err);
     }

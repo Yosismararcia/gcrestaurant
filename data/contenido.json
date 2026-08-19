@@ -7,7 +7,7 @@
   },
   "especial": {
     "pesca del dia al cilantro": {
-      "plato": "pesca del dia al cilantro",
+      "plato": "Pesca del día al cilantro",
       "imagen": "https://images.unsplash.com/photo-1555126634-323283e090fa?w=800&auto=format&fit=crop&q=70",
       "inspirado_en": [
         "Pescado fresco",
@@ -15,9 +15,39 @@
         "Crema de leche",
         "Tomate"
       ],
-      "receta": "INGREDIENTES (unidades del inventario):\n- Pescado fresco: 0.25 kg\n- Cilantro: 0.05 kg\n- Crema de leche: 0.15 L\n- Tomate: 0.05 kg\n- Sal al gusto\nPASOS:\n1. Corta el pescado en cubos de 3 cm y sazona con sal.\n2. Sella el pescado en sarten caliente 60 segundos por lado, hasta dorar, y reserva.\n3. Procesa el cilantro con la crema de leche y la mitad del tomate hasta obtener una salsa sedosa.\n4. Vierte la salsa sobre el pescado y cocina 3 minutos a fuego bajo.\n5. Sirve con tostadas de pan ciabatta y decora con el tomate en cubos.\nTIEMPO: 15 minutos.\nZERO-WASTE: rescata 0.25 kg de pescado, cilantro, crema y tomate a punto de vencer, evitando ~S/ 8.84 en mermas.",
-      "hashtags": "#ZeroWaste #EspecialDelDia #GCRestaurant",
-      "fecha": "2026-08-16"
+      "fecha": "2026-08-19",
+      "receta": "INGREDIENTES (unidades del inventario):\n- Pescado fresco: 0.25 kg\n- Cilantro: 0.05 kg\n- Crema de leche: 0.15 L\n- Tomate: 0.05 kg\n\nPASOS:\n1. Prepara los ingredientes con la técnica clásica del platillo.\n2. Sírvelo fresco y atractivo.\n3. ¡Véndelo HOY como Especial Zero-Waste!",
+      "hashtags": "#EspecialDelDia #ZeroWaste #GCRestaurant"
+    },
+    "paella de mariscos": {
+      "plato": "Paella de Mariscos",
+      "imagen": "https://commons.wikimedia.org/wiki/Special:FilePath/01_Paella_Valenciana_original.jpg?width=800",
+      "inspirado_en": [
+        "Arroz bomba",
+        "Camarones",
+        "Calamar",
+        "Mejillones",
+        "Azafrán",
+        "Guisantes"
+      ],
+      "fecha": "2026-08-19",
+      "receta": "INGREDIENTES (unidades del inventario):\n- Arroz bomba: 0.2 kg\n- Camarones: 0.12 kg\n- Calamar: 0.1 kg\n- Mejillones: 0.12 kg\n- Azafrán: 0.001 kg\n- Guisantes: 0.04 kg\n\nPASOS:\n1. Prepara los ingredientes con la técnica clásica del platillo.\n2. Sírvelo fresco y atractivo.\n3. ¡Véndelo HOY como Especial Zero-Waste!",
+      "hashtags": "#EspecialDelDia #ZeroWaste #GCRestaurant"
+    },
+    "burger y papas": {
+      "plato": "Burger y Papas",
+      "imagen": "https://commons.wikimedia.org/wiki/Special:FilePath/RedDot_Burger.jpg?width=800",
+      "inspirado_en": [
+        "Carne de res",
+        "Pan brioche",
+        "Queso cheddar",
+        "Lechuga",
+        "Tomate",
+        "Papas"
+      ],
+      "fecha": "2026-08-19",
+      "receta": "INGREDIENTES (unidades del inventario):\n- Carne de res: 0.18 kg\n- Pan brioche: 1.0 pzas\n- Queso cheddar: 0.04 kg\n- Lechuga: 0.04 kg\n- Tomate: 0.05 kg\n- Papas: 0.18 kg\n\nPASOS:\n1. Prepara los ingredientes con la técnica clásica del platillo.\n2. Sírvelo fresco y atractivo.\n3. ¡Véndelo HOY como Especial Zero-Waste!",
+      "hashtags": "#EspecialDelDia #ZeroWaste #GCRestaurant"
     }
   }
 }

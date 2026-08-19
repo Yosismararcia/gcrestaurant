@@ -232,6 +232,52 @@ def _guardar_visibilidad(visibilidad):
         return
 
 
+def _cargar_recetas():
+    return _leer_json("recetas.json", {"recetas": []}).get("recetas", [])
+
+
+def _guardar_recetas(recetas):
+    try:
+        ruta = os.path.join(DATA_DIR, "recetas.json")
+        with open(ruta, "w", encoding="utf-8") as archivo:
+            json.dump({"recetas": recetas}, archivo, ensure_ascii=False, indent=2)
+        return True
+    except OSError:
+        return False
+
+
+def _cargar_proveedores():
+    return _leer_json("proveedores.json", {"proveedores": []}).get("proveedores", [])
+
+
+def _guardar_proveedores(proveedores):
+    try:
+        ruta = os.path.join(DATA_DIR, "proveedores.json")
+        with open(ruta, "w", encoding="utf-8") as archivo:
+            json.dump({"proveedores": proveedores}, archivo, ensure_ascii=False, indent=2)
+        return True
+    except OSError:
+        return False
+
+
+def _cargar_movimientos():
+    return _leer_json("movimientos.json", {"movimientos": []}).get("movimientos", [])
+
+
+def _guardar_movimientos(movimientos):
+    try:
+        ruta = os.path.join(DATA_DIR, "movimientos.json")
+        with open(ruta, "w", encoding="utf-8") as archivo:
+            json.dump({"movimientos": movimientos}, archivo, ensure_ascii=False, indent=2)
+        return True
+    except OSError:
+        return False
+
+
+def _nuevo_id(lista, prefijo="item"):
+    return f"{prefijo}-{int(datetime.utcnow().timestamp() * 1000)}"
+
+
 def _normalizada_en(lista, valor):
     return _norm(valor) in {_norm(x) for x in lista}
 
@@ -261,6 +307,20 @@ def _precio_de(promo, mapa_insumos):
     base = costo * MARCAJE
     final = base * (1 - float(promo.get("descuento", 0)) / 100)
     return round(base, 2), round(final, 2)
+
+
+def _descripcion_larga(promo):
+    ingredientes = list(promo.get("ingredientes", {}).keys())[:6]
+    base = (promo.get("descripcion") or "").strip()
+    partes = [p for p in [base] if p]
+    if ingredientes:
+        partes.append(f"Preparado con {', '.join(ingredientes).capitalize()}.")
+    if promo.get("dias"):
+        partes.append(f"Disponible {promo['dias']}.")
+    desc = promo.get("descuento", 0)
+    if desc:
+        partes.append(f"Hoy con {desc}% de descuento.")
+    return " ".join(partes) or "Platillo del día preparado con ingredientes frescos."
 
 
 def _decorar_inventario(insumos):
@@ -392,6 +452,26 @@ def _combo_del_dia(insumos):
         "valor_recuperado": round(sum(float(i.get("valor_linea", 0)) for i in elegidos), 2),
         "sugerencia": "Prepáralo hoy y publícalo como banner para venderlo antes de que venza.",
     }
+
+
+def _rescatados(db, insumos, promos):
+    """S/ generados por pedidos cuyo plato rescata insumos críticos (zero waste)."""
+    criticos = {_norm(i["nombre"]) for i in insumos if (i.get("critico") or i.get("vencido"))}
+    por_plato = {_norm(p["plato"]): p for p in promos}
+    total = 0.0
+    conteo = 0
+    for p in db.query(Pedido).order_by(Pedido.id.desc()).limit(800).all():
+        try:
+            platos = json.loads(p.platos or "[]")
+        except (ValueError, TypeError):
+            continue
+        if any(
+            (por_plato.get(_norm(d.get("plato", ""))) or {}).get("ingredientes", {}).keys() & criticos
+            for d in platos
+        ):
+            total += float(getattr(p, "total", 0) or 0)
+            conteo += 1
+    return round(total, 2), conteo
 
 
 # ============================================================
@@ -537,6 +617,7 @@ def api_datos():
                 "descuento": p["descuento"],
                 "dias": p["dias"],
                 "descripcion": p["descripcion"],
+                "descripcion_larga": _descripcion_larga(p),
                 "categoria": p["categoria"],
                 "imagen": p["imagen"],
                 "precio_base": base,
@@ -546,15 +627,24 @@ def api_datos():
 
     banners = [b for b in _cargar_banners() if not _normalizada_en(visibilidad.get("banners_ocultos", []), b.get("id", ""))]
     contenido = _cargar_contenido()
-    especial_publico = {
-        clave: {
+    por_publico = {_norm(p["plato"]): p for p in publicas}
+    especial_publico = {}
+    for clave, e in contenido.get("especial", {}).items():
+        promo = por_publico.get(_norm(e.get("plato", clave)))
+        especial_publico[clave] = {
             "plato": e.get("plato", clave),
             "imagen": e.get("imagen", ""),
             "inspirado_en": e.get("inspirado_en", []),
             "fecha": e.get("fecha", ""),
+            "receta": e.get("receta", ""),
+            "hashtags": e.get("hashtags", ""),
+            "descripcion_larga": e.get("descripcion_larga")
+            or (f"Elaborado con {', '.join(e.get('inspirado_en', [])[:4])}. "
+                "Receta del chef que rescata lo más fresco del día." if e.get("inspirado_en") else
+                "El plato que nuestro chef prepara hoy con lo más fresco del día."),
+            "precio_base": promo.get("precio_base") if promo else None,
+            "precio_final": promo.get("precio_final") if promo else None,
         }
-        for clave, e in contenido.get("especial", {}).items()
-    }
 
     destacadas = _promos_destacadas(publicas, promos, _decorar_inventario(insumos), _db())
 
@@ -563,6 +653,7 @@ def api_datos():
             "proyecto": "G&CRestaurant",
             "promociones": publicas,
             "banners": banners,
+            "recetas": [r for r in _cargar_recetas() if r.get("publicada_hoy")],
             "contenido": {"copy": contenido.get("copy", {}), "especial": especial_publico},
             "destacadas": destacadas,
             "comentarios": [_serializar_comentario(c) for c in _db().query(Comentario).order_by(Comentario.id.desc()).limit(30).all()],
@@ -729,6 +820,8 @@ def api_admin_datos():
         key=lambda x: (x.get("vencido"), x.get("dias_para_caducar")),
     )
     valor_total = round(sum(float(i.get("valor_linea", 0)) for i in insumos), 2)
+    valor_riesgo = round(sum(float(i.get("valor_linea", 0)) for i in criticos), 2)
+    rescatados, rescates_ventas = _rescatados(_db(), insumos, promociones)
     pedidos_nuevos = _db().query(Pedido).filter(Pedido.visto.is_(False)).count()
     ventas = round(float(_db().query(func.coalesce(func.sum(Pedido.total), 0)).scalar() or 0), 2)
 
@@ -755,6 +848,9 @@ def api_admin_datos():
             "inventario": insumos,
             "banners": banners,
             "contenido": _cargar_contenido(),
+            "recetas": _cargar_recetas(),
+            "proveedores": _cargar_proveedores(),
+            "movimientos": _cargar_movimientos(),
             "clientes": clientes,
             "propuestas": _propuestas_rescate(insumos, promociones),
             "combo_del_dia": _combo_del_dia(insumos),
@@ -765,6 +861,9 @@ def api_admin_datos():
                 "total_insumos": len(insumos),
                 "insumos_criticos": len(criticos),
                 "valor_inventario": valor_total,
+                "valor_riesgo": valor_riesgo,
+                "rescatados": rescatados,
+                "rescates_ventas": rescates_ventas,
                 "pedidos_nuevos": pedidos_nuevos,
                 "ventas": ventas,
             },
@@ -860,6 +959,7 @@ def _serializar_pedido(p):
     return {
         "id": p.id,
         "numero_orden": p.numero_orden,
+        "usuario_id": p.usuario_id,
         "cliente_nombre": p.cliente_nombre,
         "cliente_cedula": p.cliente_cedula,
         "platos": platos,
@@ -868,6 +968,238 @@ def _serializar_pedido(p):
         "visto": bool(getattr(p, "visto", False)),
         "creado": p.creado.isoformat() if p.creado else "",
     }
+
+
+@app.route("/api/admin/especial", methods=["POST"])
+def api_admin_especial():
+    """Convierte un plato (o insumo crítico) en el Especial del Día zero-waste."""
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    datos = request.get_json(silent=True) or {}
+    plato = (datos.get("plato") or "").strip()
+    promos = _cargar_promociones()
+    seleccion = next((p for p in promos if _norm(p["plato"]) == _norm(plato)), None)
+    if not seleccion:
+        return jsonify({"ok": False, "error": "Plato no encontrado en promociones.csv."}), 404
+
+    insumos = {_norm(i["nombre"]): i for i in _cargar_inventario()}
+    lineas = []
+    for n, c in seleccion.get("ingredientes", {}).items():
+        ins = insumos.get(n) or {}
+        lineas.append(f"- {ins.get('nombre') or n}: {c} {ins.get('unidad', '')}")
+    nuevo = {
+        "plato": seleccion["plato"],
+        "imagen": seleccion.get("imagen", ""),
+        "inspirado_en": [insumos.get(n, {}).get("nombre") or n for n in seleccion.get("ingredientes", {})],
+        "fecha": date.today().isoformat(),
+        "receta": "INGREDIENTES (unidades del inventario):\n"
+        + ("\n".join(lineas) if lineas else "- Ingredientes según carta")
+        + "\n\nPASOS:\n1. Prepara los ingredientes con la técnica clásica del platillo.\n"
+        + "2. Sírvelo fresco y atractivo.\n3. ¡Véndelo HOY como Especial Zero-Waste!",
+        "hashtags": "#EspecialDelDia #ZeroWaste #GCRestaurant",
+    }
+    contenido = _cargar_contenido()
+    contenido.setdefault("especial", {})[_norm(seleccion["plato"])] = nuevo
+    guardado = True
+    try:
+        ruta = os.path.join(DATA_DIR, "contenido.json")
+        with open(ruta, "w", encoding="utf-8") as archivo:
+            json.dump(contenido, archivo, ensure_ascii=False, indent=2)
+    except OSError:
+        guardado = False
+    return jsonify({"ok": True, "guardado": guardado, "especial": nuevo, "mensaje": f"'{seleccion['plato']}' ahora es el Especial del Día. ⚡"})
+
+
+@app.route("/api/admin/recetas", methods=["POST"])
+def api_admin_receta_save():
+    """Crea o actualiza una receta fácil para el cliente."""
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    datos = request.get_json(silent=True) or {}
+    r = datos.get("receta") or {}
+    titulo = (r.get("titulo") or "").strip()
+    if not titulo:
+        return jsonify({"ok": False, "error": "El título de la receta es obligatorio."}), 400
+    recetas = _cargar_recetas()
+    rid = (r.get("id") or "").strip()
+    if rid:
+        objetivo = next((x for x in recetas if x.get("id") == rid), None)
+        if not objetivo:
+            return jsonify({"ok": False, "error": "Receta no encontrada."}), 404
+        objetivo.update({
+            "titulo": titulo,
+            "imagen": (r.get("imagen") or "").strip(),
+            "tiempo_min": int(float(r.get("tiempo_min") or 0) or 0),
+            "porciones": int(float(r.get("porciones") or 1) or 1),
+            "ingredientes": [str(x).strip() for x in (r.get("ingredientes") or []) if str(x).strip()],
+            "pasos": [str(x).strip() for x in (r.get("pasos") or []) if str(x).strip()],
+            "publicada_hoy": bool(r.get("publicada_hoy")),
+        })
+    else:
+        objetivo = {
+            "id": _nuevo_id(recetas, "receta"),
+            "titulo": titulo,
+            "imagen": (r.get("imagen") or "").strip(),
+            "tiempo_min": int(float(r.get("tiempo_min") or 0) or 0),
+            "porciones": int(float(r.get("porciones") or 1) or 1),
+            "ingredientes": [str(x).strip() for x in (r.get("ingredientes") or []) if str(x).strip()],
+            "pasos": [str(x).strip() for x in (r.get("pasos") or []) if str(x).strip()],
+            "publicada_hoy": bool(r.get("publicada_hoy")),
+            "creado": datetime.utcnow().isoformat(),
+        }
+        recetas.insert(0, objetivo)
+    ok = _guardar_recetas(recetas)
+    return jsonify({"ok": ok, "receta": objetivo, "mensaje": "Receta guardada." if ok else "Vista previa: no se pudo escribir en el servidor."})
+
+
+@app.route("/api/admin/recetas/<rid>/publicar", methods=["POST"])
+def api_admin_receta_publicar(rid):
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    datos = request.get_json(silent=True) or {}
+    recetas = _cargar_recetas()
+    objetivo = next((x for x in recetas if x.get("id") == rid), None)
+    if not objetivo:
+        return jsonify({"ok": False, "error": "Receta no encontrada."}), 404
+    objetivo["publicada_hoy"] = bool(datos.get("publicar"))
+    ok = _guardar_recetas(recetas)
+    return jsonify({"ok": ok, "publicada_hoy": objetivo["publicada_hoy"], "mensaje": "Estado de publicación actualizado."})
+
+
+@app.route("/api/admin/recetas/<rid>/eliminar", methods=["POST"])
+def api_admin_receta_eliminar(rid):
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    recetas = _cargar_recetas()
+    recetas = [x for x in recetas if x.get("id") != rid]
+    ok = _guardar_recetas(recetas)
+    return jsonify({"ok": ok, "mensaje": "Receta eliminada." if ok else "No se pudo eliminar."})
+
+
+@app.route("/api/admin/inventario/ajustar", methods=["POST"])
+def api_admin_inventario_ajustar():
+    """Registra entrada/salida de almacén y ajusta el stock."""
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    datos = request.get_json(silent=True) or {}
+    nombre = (datos.get("insumo") or "").strip()
+    tipo = datos.get("tipo") in ("entrada", "salida") and datos.get("tipo") or "entrada"
+    try:
+        cantidad = abs(float(datos.get("cantidad") or 0))
+    except (TypeError, ValueError):
+        cantidad = 0
+    if cantidad <= 0:
+        return jsonify({"ok": False, "error": "Indica una cantidad válida."}), 400
+    motivo = (datos.get("motivo") or "").strip() or "Ajuste manual"
+
+    insumos = _cargar_inventario()
+    insumo = next((i for i in insumos if _norm(i["nombre"]) == _norm(nombre)), None)
+    if not insumo:
+        return jsonify({"ok": False, "error": "Insumo no encontrado."}), 404
+
+    stock = float(insumo.get("stock", 0) or 0)
+    nuevo = round(stock + cantidad if tipo == "entrada" else stock - cantidad, 3)
+    if nuevo < 0:
+        return jsonify({"ok": False, "error": "El stock no puede quedar negativo."}), 409
+    insumo["stock"] = nuevo
+    _guardar_inventario(insumos)
+
+    movimientos = _cargar_movimientos()
+    movimientos.insert(0, {
+        "id": _nuevo_id(movimientos, "mov"),
+        "insumo": insumo["nombre"],
+        "tipo": tipo,
+        "cantidad": round(cantidad, 3),
+        "stock_resultante": nuevo,
+        "motivo": motivo,
+        "fecha": datetime.utcnow().isoformat(),
+    })
+    _guardar_movimientos(movimientos[:200])
+    return jsonify({"ok": True, "stock": nuevo, "mensaje": f"{'Entrada' if tipo == 'entrada' else 'Salida'} registrada."})
+
+
+@app.route("/api/admin/inventario/insumo", methods=["POST"])
+def api_admin_inventario_insumo():
+    """Actualiza costo, caducidad, unidad, categoría o proveedor de un insumo."""
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    datos = request.get_json(silent=True) or {}
+    nombre = (datos.get("nombre") or "").strip()
+    insumos = _cargar_inventario()
+    insumo = next((i for i in insumos if _norm(i["nombre"]) == _norm(nombre)), None)
+    if not insumo:
+        return jsonify({"ok": False, "error": "Insumo no encontrado."}), 404
+    for campo in ("costo_unitario", "fecha_caducidad", "unidad", "categoria", "proveedor"):
+        if campo in datos and datos.get(campo) not in (None, ""):
+            if campo == "costo_unitario":
+                try:
+                    insumo[campo] = float(datos[campo])
+                except (TypeError, ValueError):
+                    return jsonify({"ok": False, "error": "Costo inválido."}), 400
+            else:
+                insumo[campo] = str(datos[campo]).strip()
+    _guardar_inventario(insumos)
+    return jsonify({"ok": True, "insumo": insumo, "mensaje": "Insumo actualizado."})
+
+
+@app.route("/api/admin/inventario/proveedor", methods=["POST"])
+def api_admin_proveedor_save():
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    datos = request.get_json(silent=True) or {}
+    p = datos.get("proveedor") or {}
+    nombre = (p.get("nombre") or "").strip()
+    if not nombre:
+        return jsonify({"ok": False, "error": "El nombre del proveedor es obligatorio."}), 400
+    proveedores = _cargar_proveedores()
+    pid = (p.get("id") or "").strip()
+    if pid:
+        objetivo = next((x for x in proveedores if x.get("id") == pid), None)
+        if not objetivo:
+            return jsonify({"ok": False, "error": "Proveedor no encontrado."}), 404
+        objetivo.update({
+            "nombre": nombre,
+            "contacto": (p.get("contacto") or "").strip(),
+            "telefono": (p.get("telefono") or "").strip(),
+            "email": (p.get("email") or "").strip(),
+            "rubro": (p.get("rubro") or "").strip(),
+        })
+    else:
+        objetivo = {
+            "id": _nuevo_id(proveedores, "prov"),
+            "nombre": nombre,
+            "contacto": (p.get("contacto") or "").strip(),
+            "telefono": (p.get("telefono") or "").strip(),
+            "email": (p.get("email") or "").strip(),
+            "rubro": (p.get("rubro") or "").strip(),
+        }
+        proveedores.insert(0, objetivo)
+    ok = _guardar_proveedores(proveedores)
+    return jsonify({"ok": ok, "proveedor": objetivo, "mensaje": "Proveedor guardado."})
+
+
+@app.route("/api/admin/clientes/<int:uid>")
+def api_admin_cliente(uid):
+    """Detalle de un cliente + su historial de pedidos (para el módulo Pedidos y Clientes)."""
+    if not _con_api_protegida():
+        return jsonify({"ok": False, "error": "Acceso no autorizado."}), 401
+    db = _db()
+    u = db.query(Usuario).get(uid)
+    if not u:
+        return jsonify({"ok": False, "error": "Cliente no encontrado."}), 404
+    pedidos = db.query(Pedido).filter(Pedido.usuario_id == u.id).order_by(Pedido.id.desc()).limit(30).all()
+    return jsonify({
+        "ok": True,
+        "cliente": {
+            "id": u.id,
+            "nombre": u.nombre or u.username,
+            "usuario": u.username,
+            "cedula": u.cedula or "",
+            "creado": u.creado.isoformat() if u.creado else "",
+            "gasto_acumulado": round(getattr(u, "gasto_acumulado", 0) or 0, 2),
+        },
+        "pedidos": [_serializar_pedido(p) for p in pedidos],
+    })
 
 
 @app.route("/api/admin/pedidos")
@@ -1006,4 +1338,10 @@ def servir_banners(nombre):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    _bool_env = lambda v: os.environ.get(v, "").strip().lower() in ("1", "true", "yes", "on")
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=os.environ.get("FLASK_DEBUG", "1") != "0",
+        use_reloader=_bool_env("FLASK_RELOAD"),
+    )

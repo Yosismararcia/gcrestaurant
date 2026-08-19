@@ -24,156 +24,178 @@
       <button class="btn btn--primary btn--cta-s" id="btnLogout" type="button" hidden>Salir 🔒</button>
     </div>
   </div>
-  <nav class="container admin-nav" id="adminNav" hidden aria-label="Secciones del panel">
-    <button class="admin-nav__btn activo" data-vista="resumen" type="button">📊 Resumen</button>
-    <button class="admin-nav__btn" data-vista="pedidos" type="button">🧾 Pedidos <span class="tag tag--crit" id="navPedidosNuevos" hidden>0</span></button>
-    <button class="admin-nav__btn" data-vista="clientes" type="button">👥 Clientes</button>
-    <button class="admin-nav__btn" data-vista="promociones" type="button">🍽️ Promociones</button>
-    <button class="admin-nav__btn" data-vista="especial" type="button">🍳 Especial</button>
-    <button class="admin-nav__btn" data-vista="inventario" type="button">📦 Inventario</button>
-    <button class="admin-nav__btn" data-vista="anuncios" type="button">🎨 Anuncios</button>
-    <button class="admin-nav__btn" data-vista="avisos" type="button">🥫 Mermas</button>
+  <nav class="container admin-nav" id="adminNav" hidden aria-label="Módulos del panel">
+    <button class="admin-nav__btn activo" data-modulo="resumen" type="button">📊 Resumen e Impacto</button>
+    <button class="admin-nav__btn" data-modulo="pedidos" type="button">🧾 Pedidos y Clientes <span class="tag tag--crit" id="navPedidosNuevos" hidden>0</span></button>
+    <button class="admin-nav__btn" data-modulo="menu" type="button">🍽️ Menú y Marketing</button>
+    <button class="admin-nav__btn" data-modulo="inventario" type="button">📦 Inventario y Stock</button>
   </nav>
+  <nav class="container admin-subnav" id="adminSubnav" hidden aria-label="Secciones del módulo"></nav>
 </header>
 
 <main class="container" style="padding-block:40px">
 
-  <!-- PANEL -->
   <section id="dashboard" hidden aria-live="polite">
 
+    <!-- ============ MÓDULO 1 · RESUMEN E IMPACTO ============ -->
+    <div class="admin-vista activa" data-vista="resumen-impacto">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Impacto diario · zero-waste en tiempo real</p>
+        <h2 class="section__title">Resumen e Impacto</h2>
+        <p class="section__sub">Cuánto dinero está en riesgo, cuánto se ha rescatado y qué vende el restaurante.</p>
+      </div>
+      <div class="kpis">
+        <div class="kpi kpi--crit"><b id="kEnRiesgo">–</b><span>S/ en Riesgo</span></div>
+        <div class="kpi kpi--venta"><b id="kRescatados">–</b><span>S/ Rescatados</span></div>
+        <div class="kpi"><b id="kValorInventario">–</b><span>Valor Total Inventario</span></div>
+        <div class="kpi"><b id="kVentas">–</b><span>Ventas Totales</span></div>
+      </div>
+    </div>
+
+    <div class="admin-vista" data-vista="resumen-alertas">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Prevención de mermas</p>
+        <h2 class="section__title">Alertas de vencimiento</h2>
+        <p class="section__sub">
+          Insumos en riesgo dentro de los próximos <span id="ventanaAlertas">5</span> días.
+          Convierte el platillo que los rescata en el <strong>Especial del Día</strong> y evita la merma.
+        </p>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Insumo</th><th class="num">Cantidad / Unid.</th><th class="num">Valor financiero</th>
+              <th>Días para vencer</th><th>Nivel de riesgo</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyAlertas"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="emptyAlertas" hidden>Sin insumos en riesgo. Todo fresco. 🎉</p>
+    </div>
+
+    <!-- ============ MÓDULO 2 · PEDIDOS Y CLIENTES ============ -->
     <div class="admin-vista" data-vista="pedidos">
       <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Pedidos de clientes · tiempo real</p>
+        <p class="kicker">Operación del día · tiempo real</p>
         <h2 class="section__title">Pedidos</h2>
-      </div>
-      <div class="admin-sec" id="secPedidos">
-        <h3 class="admin-sec__titulo">🧾 Órdenes recientes</h3>
         <p class="section__sub">
-          Los nuevos pedidos aparecen al instante. Marca como visto y avanza el estado:
-          el cliente ve el cambio en su sección "Mis pedidos".
+          Los nuevos pedidos aparecen al instante. Marca como visto, avanza el estado y
+          haz clic en el cliente para ver su contacto e historial.
         </p>
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Orden</th><th>Cliente</th><th>Platos</th><th class="num">Total</th><th>Estado</th><th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyPedidos"></tbody>
-          </table>
-        </div>
-        <p class="empty" id="emptyPedidos" hidden>No hay pedidos todavía. 🍽️</p>
       </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Orden</th><th>Cliente</th><th>Platos</th><th class="num">Total</th><th>Estado</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPedidos"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="emptyPedidos" hidden>No hay pedidos todavía. 🍽️</p>
     </div>
 
     <div class="admin-vista" data-vista="clientes">
       <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Dinero acumulado por compras</p>
+        <p class="kicker">Clientes registrados</p>
         <h2 class="section__title">Clientes</h2>
+        <p class="section__sub">Cada pedido suma al total del cliente. Pulsa el botón para ver contacto e historial.</p>
       </div>
-      <div class="admin-sec" id="secClientes">
-        <h3 class="admin-sec__titulo">👥 Gasto acumulado por cliente</h3>
-        <p class="section__sub">Cada pedido suma al total del cliente. Ordenados por mayor gasto.</p>
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Cliente</th><th>Usuario</th><th>Cédula / DNI</th><th class="num">Pedidos</th><th class="num">Total acumulado</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyClientes"></tbody>
-          </table>
-        </div>
-        <p class="empty" id="emptyClientes" hidden>Todavía no hay clientes registrados. 👥</p>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Cliente</th><th>Usuario</th><th>Cédula / DNI</th>
+              <th class="num">Pedidos</th><th class="num">Total acumulado</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tbodyClientes"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="emptyClientes" hidden>Todavía no hay clientes registrados. 👥</p>
+      <div id="clienteDetalle" hidden style="margin-top:22px">
+        <h3 class="admin-sec__titulo">🔍 Detalle del cliente</h3>
+        <div id="clienteDetalleContenido"></div>
       </div>
     </div>
 
-    <div class="admin-vista activa" data-vista="resumen">
+    <!-- ============ MÓDULO 3 · MENÚ Y MARKETING ============ -->
+    <div class="admin-vista" data-vista="menu-recetas">
       <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Inventario · Recetas · Avisos</p>
-        <h2 class="section__title">Panel del restaurante</h2>
+        <p class="kicker">Carta y promociones</p>
+        <h2 class="section__title">Recetas de cocina</h2>
+        <p class="section__sub">
+          Ingredientes de cada promo, visibilidad en la web (Mostrar/Ocultar) y herramientas de marketing en un solo lugar.
+        </p>
       </div>
-      <div class="kpis" id="kpis">
-        <div class="kpi"><b id="kPromos">–</b><span>Promociones</span></div>
-        <div class="kpi"><b id="kInsumos">–</b><span>Insumos</span></div>
-        <div class="kpi kpi--crit"><b id="kCriticos">–</b><span>Por vencer</span></div>
-        <div class="kpi"><b id="kValor">–</b><span>Valor inventario</span></div>
-        <div class="kpi kpi--venta"><b id="kVentas">–</b><span>Ventas</span></div>
+      <div class="inv-filtro">
+        <input class="inv-buscar" id="recBuscar" type="search"
+               placeholder="🔍  Buscar plato o ingrediente…" autocomplete="off" aria-label="Buscar plato o ingrediente">
       </div>
-      <div class="admin-sec" id="secAlertas">
-        <h3 class="admin-sec__titulo">⚠️ Avisos de vencimiento</h3>
-        <p class="section__sub">Insumos críticos en los próximos <span id="ventanaAlertas">5</span> días.</p>
-        <div class="grid grid--alertas" id="gridAlertas"></div>
-      </div>
-    </div>
-
-    <div class="admin-vista" data-vista="promociones">
-      <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Recetas de cocina</p>
-        <h2 class="section__title">Promociones</h2>
-      </div>
-      <div class="admin-sec" id="secRecetas">
-        <h3 class="admin-sec__titulo">📖 Recetas de cocina (ingredientes de cada promo)</h3>
-        <div class="inv-filtro">
-          <input class="inv-buscar" id="recBuscar" type="search"
-                 placeholder="🔍  Buscar plato o ingrediente…" autocomplete="off" aria-label="Buscar plato o ingrediente">
-        </div>
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr><th>Plato</th><th>Descuento</th><th>Receta (insumos)</th><th>Visibilidad</th></tr>
-            </thead>
-            <tbody id="tbodyRecetas"></tbody>
-          </table>
-        </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Plato</th><th>Descuento</th><th>Receta (insumos)</th><th>En la web</th><th>Marketing</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRecetas"></tbody>
+        </table>
       </div>
     </div>
 
-    <div class="admin-vista" data-vista="especial">
+    <div class="admin-vista" data-vista="menu-especial">
       <div class="section__head" style="margin-bottom:20px">
         <p class="kicker">Chef Zero-Waste</p>
         <h2 class="section__title">Especial del Día</h2>
+        <p class="section__sub">Recetas del día que rescatan insumos por vencer. Configúralas desde las alertas del Resumen.</p>
       </div>
-      <div class="admin-sec" id="secEspecial">
-        <h3 class="admin-sec__titulo">🍳 Recetas del día</h3>
-        <div class="grid grid--especial" id="gridEspecial"></div>
-      </div>
+      <div class="grid grid--especial" id="gridEspecial"></div>
+      <div id="cardCombo"></div>
+      <p class="empty" id="emptyCombo" hidden>Todo el inventario está fresco. No hace falta rescate hoy. 🎉</p>
     </div>
 
-    <div class="admin-vista" data-vista="inventario">
+    <div class="admin-vista" data-vista="menu-recetas-faciles">
       <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Stock y caducidades</p>
-        <h2 class="section__title">Inventario fresco</h2>
+        <p class="kicker">Entretenimiento culinario</p>
+        <h2 class="section__title">Recetas Fáciles · “Aprende y Cocina en Casa”</h2>
+        <p class="section__sub">
+          Crea o edita recetas para la web del cliente. El interruptor
+          <strong>“Publicar en la Web del Cliente Hoy”</strong> las muestra al instante en la sección Aprende y Cocina.
+        </p>
       </div>
-      <div class="admin-sec" id="secInventario">
-        <h3 class="admin-sec__titulo">📦 Detalle de insumos</h3>
-        <p class="section__sub">Las cantidades se actualizan solas con cada pedido que consume ingredientes. La tabla se refresca en vivo cada 5 segundos.</p>
-        <div class="inv-filtro">
-          <input class="inv-buscar" id="invBuscar" type="search"
-                 placeholder="🔍  Buscar por nombre de insumo…" autocomplete="off" aria-label="Buscar insumo por nombre">
-        </div>
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Insumo</th><th>Categoría</th><th class="num">Cantidad</th>
-                <th class="num">Costo S/</th><th class="num">Valor S/</th>
-                <th>Caducidad</th><th>Estado</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyInventario"></tbody>
-          </table>
-        </div>
+      <button class="btn btn--primary" id="btnNuevaReceta" type="button">➕ Nueva receta</button>
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Receta</th><th class="num">Tiempo</th><th class="num">Porciones</th>
+              <th>Publicada hoy</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRecetasFaciles"></tbody>
+        </table>
       </div>
+      <p class="empty" id="emptyRecetasFaciles" hidden>Aún no hay recetas fáciles creadas. 🍳</p>
     </div>
 
-    <div class="admin-vista" data-vista="anuncios">
+    <div class="admin-vista" data-vista="menu-marketing">
       <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Promos y banners en vivo</p>
-        <h2 class="section__title">Gestión de anuncios</h2>
+        <p class="kicker">Redes sociales y anuncios</p>
+        <h2 class="section__title">Marketing y Anuncios</h2>
       </div>
+
+      <div class="admin-sec" id="secMarketing">
+        <h3 class="admin-sec__titulo">📣 Compartir en redes</h3>
+        <p class="section__sub">Invita a pedir y conocer el menú del día con un clic.</p>
+        <div class="card__tools" id="marketingEnlaces"></div>
+      </div>
+
       <div class="admin-sec" id="secDestacadas">
-        <h3 class="admin-sec__titulo">🏆 Recomendadas por ventas y rotación semanal</h3>
+        <h3 class="admin-sec__titulo">🏆 Recomendadas de la semana</h3>
         <p class="section__sub">
           Lo más pedido entre semanas + rescates de frescura + variedad. La selección rota cada semana para no aburrir al cliente.
         </p>
@@ -181,58 +203,102 @@
         <button class="btn btn--primary" id="btnGenerarSemana" type="button">⚡ Generar banners de la semana</button>
         <p class="auth__msg" id="msgGenerarSemana" hidden></p>
       </div>
+
       <div class="admin-sec" id="secBanners">
         <h3 class="admin-sec__titulo">🎨 Anuncios promocionales</h3>
         <p class="section__sub">Banners de los platillos que se publican en el sitio público.</p>
         <div class="grid grid--banners" id="gridBanners"></div>
       </div>
-      <div class="admin-sec" id="secAnuncios">
-        <h3 class="admin-sec__titulo">🗑️ Control de platillos</h3>
-        <p class="section__sub">
-          Usa “Ocultar” para retirar una promoción del sitio público al instante.
-          Todo se deshace con “Mostrar”.
-        </p>
-        <div class="grid grid--banners" id="gridAnuncios"></div>
+    </div>
+
+    <!-- ============ MÓDULO 4 · INVENTARIO Y STOCK ============ -->
+    <div class="admin-vista" data-vista="inv-insumos">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Vista técnica del almacén</p>
+        <h2 class="section__title">Insumos</h2>
+        <p class="section__sub">Las cantidades se actualizan solas con cada pedido. La tabla se refresca en vivo.</p>
+      </div>
+      <div class="inv-filtro">
+        <input class="inv-buscar" id="invBuscar" type="search"
+               placeholder="🔍  Buscar por nombre de insumo…" autocomplete="off" aria-label="Buscar insumo por nombre">
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Insumo</th><th>Categoría</th><th class="num">Cantidad</th>
+              <th class="num">Costo S/</th><th class="num">Valor S/</th>
+              <th>Caducidad</th><th>Estado</th><th>Proveedor</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInventario"></tbody>
+        </table>
       </div>
     </div>
 
-    <div class="admin-vista" data-vista="avisos">
+    <div class="admin-vista" data-vista="inv-movimientos">
       <div class="section__head" style="margin-bottom:20px">
-        <p class="kicker">Control de mermas · en tiempo real</p>
-        <h2 class="section__title">Mermas y rescate</h2>
+        <p class="kicker">Entradas y salidas de almacén</p>
+        <h2 class="section__title">Movimientos</h2>
       </div>
-      <div class="kpis">
-        <div class="kpi kpi--crit"><b id="mAvisosCriticos">–</b><span>Por vencer</span></div>
-        <div class="kpi kpi--venta"><b id="mAvisosValor">–</b><span>Valor en riesgo</span></div>
-        <div class="kpi"><b id="mAvisosRescatables">–</b><span>Con platillo</span></div>
-      </div>
-      <div class="admin-sec" id="secCombo">
-        <h3 class="admin-sec__titulo">Combo del día · propuesta zero-waste</h3>
-        <p class="section__sub">Una combinación automática de los insumos más urgentes lista para venderse hoy.</p>
-        <div id="cardCombo"></div>
-        <p class="empty" id="emptyCombo" hidden>Todo el inventario está fresco. No hace falta rescate hoy. 🎉</p>
-      </div>
-      <div class="admin-sec" id="secPropuestas">
-        <h3 class="admin-sec__titulo">Platillos que rescatan cada insumo</h3>
-        <p class="section__sub">Qué se puede vender con cada insumo a punto de vencer, ordenado por urgencia.</p>
-        <div class="inv-filtro">
-          <input class="inv-buscar" id="rescBuscar" type="search"
-                 placeholder="🔍  Buscar insumo o platillo…" autocomplete="off" aria-label="Buscar insumo o platillo">
-        </div>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start">
+        <form id="formAjuste" class="card" style="padding:18px">
+          <h4 style="margin:0 0 4px">Registrar entrada / salida</h4>
+          <p class="section__sub" style="margin-bottom:12px">Ajusta el stock manualmente y deja constancia del movimiento.</p>
+          <label style="display:grid;gap:4px;margin-bottom:10px">
+            Insumo
+            <select id="ajusteInsumo" class="input" required></select>
+          </label>
+          <label style="display:grid;gap:4px;margin-bottom:10px">
+            Tipo
+            <select id="ajusteTipo" class="input">
+              <option value="entrada">Entrada (compras / recepción)</option>
+              <option value="salida">Salida (uso / merma)</option>
+            </select>
+          </label>
+          <label style="display:grid;gap:4px;margin-bottom:10px">
+            Cantidad
+            <input id="ajusteCantidad" class="input" type="number" min="0.001" step="any" required placeholder="Ej: 5">
+          </label>
+          <label style="display:grid;gap:4px;margin-bottom:14px">
+            Motivo
+            <input id="ajusteMotivo" class="input" placeholder="Ej: Compra semanal al proveedor">
+          </label>
+          <button class="btn btn--primary" type="submit">Registrar movimiento</button>
+        </form>
         <div class="table-wrap">
           <table class="table">
             <thead>
               <tr>
-                <th>Insumo</th><th class="num">Stock</th><th class="num">Valor S/</th>
-                <th>Caducidad</th><th>Platillos que lo usan</th><th>Acción</th>
+                <th>Fecha</th><th>Insumo</th><th>Tipo</th><th class="num">Cant.</th><th class="num">Stock</th><th>Motivo</th>
               </tr>
             </thead>
-            <tbody id="tbodyPropuestas"></tbody>
+            <tbody id="tbodyMovimientos"></tbody>
           </table>
         </div>
-        <p class="empty" id="emptyPropuestas" hidden>Sin insumos críticos. Todo fresco. 🎉</p>
       </div>
     </div>
+
+    <div class="admin-vista" data-vista="inv-proveedores">
+      <div class="section__head" style="margin-bottom:20px">
+        <p class="kicker">Contactos de compra</p>
+        <h2 class="section__title">Proveedores</h2>
+        <p class="section__sub">Cada proveedor se puede asignar a los insumos del almacén desde la ficha técnica.</p>
+      </div>
+      <button class="btn btn--primary" id="btnNuevoProveedor" type="button">➕ Nuevo proveedor</button>
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nombre</th><th>Contacto</th><th>Teléfono</th><th>Email</th><th>Rubro</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyProveedores"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="emptyProveedores" hidden>No hay proveedores registrados. 🤝</p>
+    </div>
+
   </section>
 </main>
 

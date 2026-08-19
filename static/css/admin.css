@@ -16,6 +16,19 @@
 .admin-nav__btn:hover { background: var(--fondo-crema); color: var(--primario-oscuro); }
 .admin-nav__btn.activo { background: var(--primario); color: #fff; border-color: var(--primario); }
 
+/* Submenú de secciones por módulo */
+.admin-subnav {
+  display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 0 4px;
+  border-bottom: 1px solid rgba(154, 52, 18, .1); margin-bottom: 18px;
+}
+.admin-subnav__btn {
+  border: 0; background: transparent; border-radius: 999px;
+  padding: 6px 12px; font-weight: 700; font-size: .8rem;
+  color: var(--tinta-suave); cursor: pointer; transition: .2s;
+}
+.admin-subnav__btn:hover { background: var(--fondo-crema); color: var(--primario-oscuro); }
+.admin-subnav__btn.activo { background: var(--primario-oscuro); color: #fff; }
+
 /* Vistas: una pantalla a la vez */
 .admin-vista { display: none; }
 .admin-vista.activa { display: block; animation: subir .4s ease both; }
