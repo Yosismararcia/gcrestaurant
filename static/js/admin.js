@@ -25,6 +25,29 @@
   const $ = (sel) => document.querySelector(sel);
   const norm = (s) => (s || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
+  const SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/;
+  const SOLO_DIGITOS = /^\d+$/;
+
+  function validarTelefono(v, permitirVacio = true) {
+    const limpio = (v || "").replace(/[\s\-().]/g, "");
+    if (!limpio) return permitirVacio;
+    return SOLO_DIGITOS.test(limpio) && limpio.length >= 6 && limpio.length <= 15;
+  }
+  function validarEmail(v, permitirVacio = true) {
+    const s = (v || "").trim();
+    if (!s) return permitirVacio;
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+  }
+  function validarNombre(v, permitirVacio = true, max = 80) {
+    const s = (v || "").trim();
+    if (!s) return permitirVacio;
+    return SOLO_LETRAS.test(s) && s.length <= max && !/\s{2,}/.test(s);
+  }
+  function validarUsuario(v) {
+    return /^[A-Za-z0-9_]{3,30}$/.test((v || "").trim());
+  }
+  const vMsg = (bien, msg) => bien || msg;
+
   let DATA = null;
   let PEDIDOS = [];
   let refrescoTimer = null;
@@ -148,7 +171,7 @@
     return data;
   }
 
-  async function cargarDatosAdmin() {
+  async function cargarDatosAdmin(vista) {
     const res = await fetch("/api/admin/datos");
     if (res.status === 401) {
       toggleUI(false);
@@ -160,7 +183,7 @@
     toggleUI(true);
     renderPaneles();
     cargarPedidos();
-    mostrarVistaAdmin("resumen-impacto");
+    mostrarVistaAdmin(vista || "resumen-impacto");
     iniciarRefresco();
   }
 
@@ -460,6 +483,7 @@
         </td>
         <td><div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn btn--cta-s" data-recedit="${r.id}" type="button">✏️ Editar</button>
+          <button class="btn btn--cta-s" data-reccopy="${r.id}" type="button" title="Crear una copia para publicar">📋 Copiar</button>
           <button class="btn btn--cta-s" data-recdel="${r.id}" type="button">🗑️</button>
         </div></td>
       </tr>`).join("");
@@ -513,21 +537,34 @@
       pasos: linea(f.get("pasos")),
       publicada_hoy: f.get("publicada_hoy") === "on",
     };
+    if (!receta.titulo) return alert("Indica el título de la receta.");
+    if (!Number.isFinite(receta.tiempo_min) || receta.tiempo_min < 0 || receta.tiempo_min > 600)
+      return alert("El tiempo debe ser un número entre 0 y 600 minutos.");
+    if (!Number.isFinite(receta.porciones) || receta.porciones < 1 || receta.porciones > 50)
+      return alert("Las porciones deben ser un número entre 1 y 50.");
+    if (receta.imagen && !/^https?:\/\//.test(receta.imagen))
+      return alert("La URL de la foto debe empezar por http:// o https://.");
     try {
       await apiPost("/api/admin/recetas", { receta });
-      cerrarModal();
-      await cargarDatosAdmin();
-      mostrarVistaAdmin("menu-recetas-faciles");
     } catch (err) {
       console.error(err);
       alert(err.message || "No se pudo guardar la receta.");
+      return;
     }
+    cerrarModal();
+    try {
+      await cargarDatosAdmin("menu-recetas-faciles");
+    } catch (e2) {
+      console.error(e2);
+      mostrarVistaAdmin("menu-recetas-faciles");
+    }
+    alert("Receta guardada correctamente. Ya puedes publicarla cuando lo decidas.");
   }
 
   async function publicarReceta(rid, publicar) {
     try {
       await apiPost(`/api/admin/recetas/${rid}/publicar`, { publicar: !!publicar });
-      await cargarDatosAdmin();
+      await cargarDatosAdmin("menu-recetas-faciles");
     } catch (err) {
       console.error(err);
       alert(err.message || "No se pudo actualizar la publicación.");
@@ -538,11 +575,18 @@
     if (!confirm("¿Eliminar esta receta de la sección Aprende y Cocina?")) return;
     try {
       await apiPost(`/api/admin/recetas/${rid}/eliminar`, {});
-      await cargarDatosAdmin();
+      await cargarDatosAdmin("menu-recetas-faciles");
     } catch (err) {
       console.error(err);
       alert(err.message || "No se pudo eliminar la receta.");
     }
+  }
+
+  function copiarReceta(rid) {
+    const src = (DATA.recetas || []).find((x) => String(x.id) === String(rid));
+    if (!src) { alert("Receta no encontrada."); return; }
+    const copia = Object.assign({}, src, { id: "" });
+    abrirModalContenido(formReceta(copia));
   }
 
   const IMAGENES_AVISO = {
@@ -718,7 +762,9 @@
     const tipo = $("#ajusteTipo").value;
     const cantidad = Number($("#ajusteCantidad").value);
     const motivo = $("#ajusteMotivo").value.trim();
-    if (!insumo || !cantidad || cantidad <= 0) { alert("Indica insumo y cantidad válida."); return; }
+    if (!insumo) { alert("Selecciona un insumo."); return; }
+    if (!Number.isFinite(cantidad) || cantidad <= 0) { alert("Indica una cantidad válida (número mayor a 0)."); return; }
+    if (!motivo) { alert("Indica el motivo del movimiento."); return; }
     try {
       await apiPost("/api/admin/inventario/ajustar", { insumo, tipo, cantidad, motivo });
       await cargarDatosAdmin();
@@ -743,10 +789,10 @@
         </label>
         <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
           <label style="display:grid;gap:4px">Unidad
-            <input class="input" name="unidad" value="${(i.unidad || "").replace(/"/g, "&quot;")}">
+            <input class="input" name="unidad" maxlength="40" value="${(i.unidad || "").replace(/"/g, "&quot;")}">
           </label>
           <label style="display:grid;gap:4px">Categoría
-            <input class="input" name="categoria" value="${(i.categoria || "").replace(/"/g, "&quot;")}">
+            <input class="input" name="categoria" maxlength="40" value="${(i.categoria || "").replace(/"/g, "&quot;")}">
           </label>
         </div>
         <label style="display:grid;gap:4px;margin-bottom:14px">Proveedor
@@ -767,10 +813,18 @@
       nombre: f.get("nombre"),
       costo_unitario: Number(f.get("costo_unitario")),
       fecha_caducidad: f.get("fecha_caducidad"),
-      unidad: f.get("unidad"),
-      categoria: f.get("categoria"),
+      unidad: (f.get("unidad") || "").trim(),
+      categoria: (f.get("categoria") || "").trim(),
       proveedor: f.get("proveedor"),
     };
+    if (!Number.isFinite(cuerpo.costo_unitario) || cuerpo.costo_unitario < 0)
+      return alert("El costo debe ser un número positivo.");
+    if (cuerpo.fecha_caducidad && !/^\d{4}-\d{2}-\d{2}$/.test(cuerpo.fecha_caducidad))
+      return alert("La fecha de caducidad no es válida.");
+    if (!validarNombre(cuerpo.unidad, true, 40))
+      return alert("La unidad solo puede contener letras, espacios, puntos y guiones.");
+    if (!validarNombre(cuerpo.categoria, true, 40))
+      return alert("La categoría solo puede contener letras, espacios, puntos y guiones.");
     try {
       await apiPost("/api/admin/inventario/insumo", cuerpo);
       cerrarModal();
@@ -807,21 +861,21 @@
         <h3 style="margin-top:12px">${p2.id ? "Editar proveedor" : "Nuevo proveedor"}</h3>
         <input type="hidden" name="id" value="${p2.id || ""}">
         <label style="display:grid;gap:4px;margin-bottom:10px">Nombre (obligatorio)
-          <input class="input" name="nombre" required value="${(p2.nombre || "").replace(/"/g, "&quot;")}" placeholder="Ej: Mercado Central">
+          <input class="input" name="nombre" required maxlength="80" value="${(p2.nombre || "").replace(/"/g, "&quot;")}" placeholder="Ej: Mercado Central">
         </label>
         <label style="display:grid;gap:4px;margin-bottom:10px">Contacto
-          <input class="input" name="contacto" value="${(p2.contacto || "").replace(/"/g, "&quot;")}" placeholder="Nombre de la persona">
+          <input class="input" name="contacto" maxlength="80" value="${(p2.contacto || "").replace(/"/g, "&quot;")}" placeholder="Nombre de la persona">
         </label>
         <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <label style="display:grid;gap:4px">Teléfono
-            <input class="input" name="telefono" value="${(p2.telefono || "").replace(/"/g, "&quot;")}">
+          <label style="display:grid;gap:4px">Teléfono (solo números)
+            <input class="input" name="telefono" inputmode="numeric" pattern="[0-9\s\-().]{6,15}" maxlength="15" value="${(p2.telefono || "").replace(/"/g, "&quot;")}" placeholder="Ej: 987654321">
           </label>
           <label style="display:grid;gap:4px">Rubro
-            <input class="input" name="rubro" value="${(p2.rubro || "").replace(/"/g, "&quot;")}" placeholder="Ej: Verduras y hortalizas">
+            <input class="input" name="rubro" maxlength="60" value="${(p2.rubro || "").replace(/"/g, "&quot;")}" placeholder="Ej: Verduras y hortalizas">
           </label>
         </div>
         <label style="display:grid;gap:4px;margin-bottom:14px">Email
-          <input class="input" name="email" type="email" value="${(p2.email || "").replace(/"/g, "&quot;")}">
+          <input class="input" name="email" type="email" maxlength="120" value="${(p2.email || "").replace(/"/g, "&quot;")}">
         </label>
         <button class="btn btn--primary" type="submit">💾 Guardar proveedor</button>
       </form>`;
@@ -838,6 +892,17 @@
       email: (f.get("email") || "").trim(),
       rubro: (f.get("rubro") || "").trim(),
     };
+    if (!proveedor.nombre) return alert("Indica el nombre del proveedor.");
+    if (!validarNombre(proveedor.nombre, false))
+      return alert("El nombre del proveedor solo puede contener letras, espacios, puntos y guiones.");
+    if (!validarNombre(proveedor.contacto, true))
+      return alert("El contacto solo puede contener letras, espacios, puntos y guiones.");
+    if (!validarTelefono(proveedor.telefono, true))
+      return alert("El teléfono solo puede contener números (6-15 dígitos, sin letras ni símbolos).");
+    if (!validarEmail(proveedor.email, true))
+      return alert("El correo electrónico no es válido.");
+    if (!validarNombre(proveedor.rubro, true, 60))
+      return alert("El rubro solo puede contener letras, espacios, puntos y guiones.");
     try {
       await apiPost("/api/admin/inventario/proveedor", { proveedor });
       cerrarModal();
@@ -1044,6 +1109,8 @@
       if (recPub) { publicarReceta(recPub.dataset.recpub, recPub.dataset.pub === "1"); return; }
       const recDel = ev.target.closest("[data-recdel]");
       if (recDel) { eliminarReceta(recDel.dataset.recdel); return; }
+      const recCopy = ev.target.closest("[data-reccopy]");
+      if (recCopy) { copiarReceta(recCopy.dataset.reccopy); return; }
 
       const insumoEdit = ev.target.closest("[data-insumo-edit]");
       if (insumoEdit) {

@@ -37,6 +37,7 @@
       </button>
       <span class="user-chip" id="userChip" hidden>
         <span class="user-chip__data"><b id="userNombre">—</b><small id="userCedula"></small></span>
+        <button class="btn btn--cta-s" id="btnVolverAdmin" type="button" hidden title="Volver al panel del administrador sin cerrar sesión">⚙️ Panel admin</button>
         <button class="btn btn--cta-s" id="btnSalir" type="button" title="Cerrar sesión">Salir</button>
       </span>
     </div>
@@ -122,7 +123,7 @@
             <button type="button" class="star" data-estrella="2" aria-label="2 estrellas">★</button>
             <button type="button" class="star" data-estrella="1" aria-label="1 estrella">★</button>
           </div>
-          <textarea class="input comment-form__texto" id="inComentario" rows="3" placeholder="Escribe tu comentario…" required></textarea>
+          <textarea class="input comment-form__texto" id="inComentario" rows="3" maxlength="500" placeholder="Escribe tu comentario…" required></textarea>
           <button class="btn btn--primary" type="submit">Publicar comentario</button>
           <p class="auth__msg" id="msgComentario" hidden></p>
         </div>

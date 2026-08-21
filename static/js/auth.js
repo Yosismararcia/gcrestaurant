@@ -9,6 +9,23 @@
 
   const $ = (sel) => document.querySelector(sel);
 
+  const SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/;
+  const SOLO_DIGITOS = /^\d+$/;
+
+  function validarTelefono(v, permitirVacio = true) {
+    const limpio = (v || "").replace(/[\s\-().]/g, "");
+    if (!limpio) return permitirVacio;
+    return SOLO_DIGITOS.test(limpio) && limpio.length >= 6 && limpio.length <= 15;
+  }
+  function validarNombre(v, permitirVacio = true, max = 80) {
+    const s = (v || "").trim();
+    if (!s) return permitirVacio;
+    return SOLO_LETRAS.test(s) && s.length <= max && !/\s{2,}/.test(s);
+  }
+  function validarUsuario(v) {
+    return /^[A-Za-z0-9_]{3,30}$/.test((v || "").trim());
+  }
+
   let sesion = { autenticado: false, admin: false, rol: "", usuario: "", nombre: "", cedula: "" };
 
   function mensaje(el, texto, ok) {
@@ -48,13 +65,13 @@
         </form>
         <form class="auth" id="formRegistro" hidden>
           <label class="auth__label" for="regNombre">Nombre completo</label>
-          <input class="auth__input" id="regNombre" type="text" placeholder="Ej. María Pérez" autocomplete="name" required>
-          <label class="auth__label" for="regCedula">Cédula / DNI</label>
-          <input class="auth__input" id="regCedula" type="text" placeholder="Ej. 12345678" autocomplete="off" required>
+          <input class="auth__input" id="regNombre" type="text" placeholder="Ej. María Pérez" autocomplete="name" maxlength="80" required>
+          <label class="auth__label" for="regCedula">Cédula / DNI (solo números)</label>
+          <input class="auth__input" id="regCedula" type="text" inputmode="numeric" pattern="[0-9]{6,15}" maxlength="15" placeholder="Ej. 12345678" autocomplete="off" required>
           <label class="auth__label" for="regUsuario">Usuario</label>
-          <input class="auth__input" id="regUsuario" type="text" placeholder="Elige un usuario (mín. 3 letras)" autocomplete="username" required>
+          <input class="auth__input" id="regUsuario" type="text" placeholder="Elige un usuario (mín. 3 letras o números)" pattern="[A-Za-z0-9_]{3,30}" maxlength="30" autocomplete="username" required>
           <label class="auth__label" for="regClave">Contraseña</label>
-          <input class="auth__input" id="regClave" type="password" placeholder="Crea tu contraseña (mín. 4)" autocomplete="new-password" required>
+          <input class="auth__input" id="regClave" type="password" placeholder="Crea tu contraseña (mín. 4)" minlength="4" autocomplete="new-password" required>
           <button class="btn btn--primary btn--block" type="submit">Crear cuenta</button>
           <p class="auth__msg" id="msgRegistro" hidden></p>
         </form>
@@ -111,11 +128,15 @@
     ev.preventDefault();
     const msg = $("#msgLogin");
     msg.hidden = true;
+    const usuario = $("#inUsuario").value.trim();
+    const password = $("#inClave").value;
+    if (!usuario) return mensaje(msg, "Escribe tu usuario.", false);
+    if (!password) return mensaje(msg, "Escribe tu contraseña.", false);
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario: $("#inUsuario").value.trim(), password: $("#inClave").value }),
+        body: JSON.stringify({ usuario, password }),
       });
       const data = await res.json();
       if (!data.ok) { mensaje(msg, data.error || "Credenciales inválidas.", false); return; }
@@ -132,15 +153,27 @@
     ev.preventDefault();
     const msg = $("#msgRegistro");
     msg.hidden = true;
+    const nombre = $("#regNombre").value.trim();
+    const cedula = $("#regCedula").value.trim();
+    const usuario = $("#regUsuario").value.trim();
+    const password = $("#regClave").value;
+    if (!validarNombre(nombre, false))
+      return mensaje(msg, "El nombre solo puede contener letras, espacios y puntos (sin números ni símbolos).", false);
+    if (!validarTelefono(cedula, false))
+      return mensaje(msg, "La cédula o DNI solo puede contener números (6-15 dígitos).", false);
+    if (!validarUsuario(usuario))
+      return mensaje(msg, "El usuario solo puede tener letras, números y guion bajo (3-30 caracteres, sin espacios).", false);
+    if (password.length < 4)
+      return mensaje(msg, "La contraseña debe tener al menos 4 caracteres.", false);
     try {
       const res = await fetch("/api/registro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre: $("#regNombre").value.trim(),
-          cedula: $("#regCedula").value.trim(),
-          usuario: $("#regUsuario").value.trim(),
-          password: $("#regClave").value,
+          nombre,
+          cedula,
+          usuario,
+          password,
         }),
       });
       const data = await res.json();

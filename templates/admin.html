@@ -261,8 +261,8 @@
             <input id="ajusteCantidad" class="input" type="number" min="0.001" step="any" required placeholder="Ej: 5">
           </label>
           <label style="display:grid;gap:4px;margin-bottom:14px">
-            Motivo
-            <input id="ajusteMotivo" class="input" placeholder="Ej: Compra semanal al proveedor">
+            Motivo (obligatorio)
+            <input id="ajusteMotivo" class="input" maxlength="120" placeholder="Ej: Compra semanal al proveedor" required>
           </label>
           <button class="btn btn--primary" type="submit">Registrar movimiento</button>
         </form>

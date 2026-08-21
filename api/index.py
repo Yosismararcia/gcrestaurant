@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 import unicodedata
 import urllib.request
 from datetime import date, datetime, timedelta
@@ -142,6 +143,43 @@ def _norm(texto):
         return ""
     texto = unicodedata.normalize("NFKD", str(texto).lower())
     return "".join(c for c in texto if not unicodedata.combining(c)).strip()
+
+
+_SOLO_DIGITOS = re.compile(r"^\d+$")
+_SOLO_LETRAS = re.compile(r"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$")
+_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_USUARIO = re.compile(r"^[A-Za-z0-9_]{3,30}$")
+
+
+def _validar_telefono(valor, permitir_vacio=True):
+    """Teléfono: solo dígitos (con espacios/guiones tolerados), 6-15 cifras."""
+    if valor is None:
+        return True if permitir_vacio else False
+    limpio = re.sub(r"[\s\-().]", "", str(valor))
+    if not limpio and permitir_vacio:
+        return True
+    return bool(_SOLO_DIGITOS.match(limpio)) and 6 <= len(limpio) <= 15
+
+
+def _validar_email(valor, permitir_vacio=True):
+    if valor is None or not str(valor).strip():
+        return permitir_vacio
+    return bool(_EMAIL.match(str(valor).strip()))
+
+
+def _validar_nombre(valor, permitir_vacio=True, max_len=80):
+    """Nombres/apellidos y rubros: letras, espacios, puntos, comillas y guiones."""
+    v = str(valor or "").strip()
+    if not v:
+        return permitir_vacio
+    if len(v) > max_len:
+        return False
+    return bool(_SOLO_LETRAS.match(v)) and not re.search(r"\s{2,}", v)
+
+
+def _validar_usuario(valor):
+    """Usuario: solo letras, números y guion bajo (3-30 caracteres)."""
+    return bool(_USUARIO.match(str(valor or "").strip()))
 
 
 def _dias_para(fecha):
@@ -534,12 +572,18 @@ def api_registro():
 
     if len(username) < 3:
         return jsonify({"ok": False, "error": "El usuario debe tener al menos 3 caracteres."}), 400
+    if not _validar_usuario(username):
+        return jsonify({"ok": False, "error": "El usuario solo puede tener letras, números y guion bajo (sin espacios ni símbolos)."}), 400
     if len(password) < 4:
         return jsonify({"ok": False, "error": "La contraseña debe tener al menos 4 caracteres."}), 400
     if not nombre:
         return jsonify({"ok": False, "error": "Indica tu nombre completo."}), 400
+    if not _validar_nombre(nombre, permitir_vacio=False):
+        return jsonify({"ok": False, "error": "El nombre solo puede contener letras, espacios y puntos (sin números ni símbolos)."}), 400
     if not cedula:
         return jsonify({"ok": False, "error": "Indica tu cédula o DNI."}), 400
+    if not _validar_telefono(cedula, permitir_vacio=False):
+        return jsonify({"ok": False, "error": "La cédula o DNI solo puede contener números (6-15 dígitos)."}), 400
 
     db = _db()
     if db.query(Usuario).filter(Usuario.username == username).first():
@@ -683,6 +727,8 @@ def api_comentario():
 
     if len(texto) < 3:
         return jsonify({"ok": False, "error": "Escribe un comentario más completo."}), 400
+    if len(texto) > 500:
+        return jsonify({"ok": False, "error": "El comentario no puede superar los 500 caracteres."}), 400
 
     c = Comentario(usuario_id=u.id, autor=u.nombre or u.username, estrellas=estrellas, texto=texto)
     db = _db()
@@ -1020,6 +1066,18 @@ def api_admin_receta_save():
     titulo = (r.get("titulo") or "").strip()
     if not titulo:
         return jsonify({"ok": False, "error": "El título de la receta es obligatorio."}), 400
+    try:
+        tiempo_min = int(float(r.get("tiempo_min") or 0) or 0)
+        porciones = int(float(r.get("porciones") or 1) or 1)
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "Tiempo y porciones deben ser números enteros."}), 400
+    if tiempo_min < 0 or tiempo_min > 600:
+        return jsonify({"ok": False, "error": "El tiempo debe estar entre 0 y 600 minutos."}), 400
+    if porciones < 1 or porciones > 50:
+        return jsonify({"ok": False, "error": "Las porciones deben estar entre 1 y 50."}), 400
+    imagen = (r.get("imagen") or "").strip()
+    if imagen and not re.match(r"^https?://", imagen):
+        return jsonify({"ok": False, "error": "La URL de la foto debe empezar por http:// o https://."}), 400
     recetas = _cargar_recetas()
     rid = (r.get("id") or "").strip()
     if rid:
@@ -1028,9 +1086,9 @@ def api_admin_receta_save():
             return jsonify({"ok": False, "error": "Receta no encontrada."}), 404
         objetivo.update({
             "titulo": titulo,
-            "imagen": (r.get("imagen") or "").strip(),
-            "tiempo_min": int(float(r.get("tiempo_min") or 0) or 0),
-            "porciones": int(float(r.get("porciones") or 1) or 1),
+            "imagen": imagen,
+            "tiempo_min": tiempo_min,
+            "porciones": porciones,
             "ingredientes": [str(x).strip() for x in (r.get("ingredientes") or []) if str(x).strip()],
             "pasos": [str(x).strip() for x in (r.get("pasos") or []) if str(x).strip()],
             "publicada_hoy": bool(r.get("publicada_hoy")),
@@ -1039,9 +1097,9 @@ def api_admin_receta_save():
         objetivo = {
             "id": _nuevo_id(recetas, "receta"),
             "titulo": titulo,
-            "imagen": (r.get("imagen") or "").strip(),
-            "tiempo_min": int(float(r.get("tiempo_min") or 0) or 0),
-            "porciones": int(float(r.get("porciones") or 1) or 1),
+            "imagen": imagen,
+            "tiempo_min": tiempo_min,
+            "porciones": porciones,
             "ingredientes": [str(x).strip() for x in (r.get("ingredientes") or []) if str(x).strip()],
             "pasos": [str(x).strip() for x in (r.get("pasos") or []) if str(x).strip()],
             "publicada_hoy": bool(r.get("publicada_hoy")),
@@ -1085,12 +1143,16 @@ def api_admin_inventario_ajustar():
     nombre = (datos.get("insumo") or "").strip()
     tipo = datos.get("tipo") in ("entrada", "salida") and datos.get("tipo") or "entrada"
     try:
-        cantidad = abs(float(datos.get("cantidad") or 0))
+        cantidad = float(datos.get("cantidad") or 0)
     except (TypeError, ValueError):
         cantidad = 0
     if cantidad <= 0:
-        return jsonify({"ok": False, "error": "Indica una cantidad válida."}), 400
-    motivo = (datos.get("motivo") or "").strip() or "Ajuste manual"
+        return jsonify({"ok": False, "error": "Indica una cantidad válida (número mayor a 0)."}), 400
+    motivo = (datos.get("motivo") or "").strip()
+    if not motivo:
+        return jsonify({"ok": False, "error": "Indica el motivo del movimiento."}), 400
+    if len(motivo) > 120:
+        return jsonify({"ok": False, "error": "El motivo no puede superar los 120 caracteres."}), 400
 
     insumos = _cargar_inventario()
     insumo = next((i for i in insumos if _norm(i["nombre"]) == _norm(nombre)), None)
@@ -1135,9 +1197,21 @@ def api_admin_inventario_insumo():
                 try:
                     insumo[campo] = float(datos[campo])
                 except (TypeError, ValueError):
-                    return jsonify({"ok": False, "error": "Costo inválido."}), 400
+                    return jsonify({"ok": False, "error": "Costo inválido: usa un número positivo."}), 400
+                if insumo[campo] < 0:
+                    return jsonify({"ok": False, "error": "El costo no puede ser negativo."}), 400
+            elif campo == "fecha_caducidad":
+                valor = str(datos[campo]).strip()
+                try:
+                    datetime.strptime(valor, "%Y-%m-%d")
+                except ValueError:
+                    return jsonify({"ok": False, "error": "Fecha de caducidad inválida."}), 400
+                insumo[campo] = valor
             else:
-                insumo[campo] = str(datos[campo]).strip()
+                valor = str(datos[campo]).strip()
+                if campo in ("unidad", "categoria") and not _validar_nombre(valor, permitir_vacio=True, max_len=40):
+                    return jsonify({"ok": False, "error": f"{'La unidad' if campo == 'unidad' else 'La categoría'} solo puede contener letras, espacios, puntos y guiones (sin símbolos)."}), 400
+                insumo[campo] = valor
     _guardar_inventario(insumos)
     return jsonify({"ok": True, "insumo": insumo, "mensaje": "Insumo actualizado."})
 
@@ -1151,6 +1225,20 @@ def api_admin_proveedor_save():
     nombre = (p.get("nombre") or "").strip()
     if not nombre:
         return jsonify({"ok": False, "error": "El nombre del proveedor es obligatorio."}), 400
+    if not _validar_nombre(nombre, permitir_vacio=False):
+        return jsonify({"ok": False, "error": "El nombre del proveedor solo puede contener letras, espacios, puntos y guiones (sin números ni símbolos)."}), 400
+    telefono = (p.get("telefono") or "").strip()
+    if not _validar_telefono(telefono, permitir_vacio=True):
+        return jsonify({"ok": False, "error": "El teléfono solo puede contener números (6-15 dígitos, sin letras ni símbolos)."}), 400
+    email = (p.get("email") or "").strip()
+    if not _validar_email(email, permitir_vacio=True):
+        return jsonify({"ok": False, "error": "El correo electrónico no es válido."}), 400
+    contacto = (p.get("contacto") or "").strip()
+    if not _validar_nombre(contacto, permitir_vacio=True):
+        return jsonify({"ok": False, "error": "El contacto solo puede contener letras, espacios, puntos y guiones (sin números ni símbolos)."}), 400
+    rubro = (p.get("rubro") or "").strip()
+    if not _validar_nombre(rubro, permitir_vacio=True, max_len=60):
+        return jsonify({"ok": False, "error": "El rubro solo puede contener letras, espacios, puntos y guiones (sin números ni símbolos)."}), 400
     proveedores = _cargar_proveedores()
     pid = (p.get("id") or "").strip()
     if pid:
@@ -1159,19 +1247,19 @@ def api_admin_proveedor_save():
             return jsonify({"ok": False, "error": "Proveedor no encontrado."}), 404
         objetivo.update({
             "nombre": nombre,
-            "contacto": (p.get("contacto") or "").strip(),
-            "telefono": (p.get("telefono") or "").strip(),
-            "email": (p.get("email") or "").strip(),
-            "rubro": (p.get("rubro") or "").strip(),
+            "contacto": contacto,
+            "telefono": telefono,
+            "email": email,
+            "rubro": rubro,
         })
     else:
         objetivo = {
             "id": _nuevo_id(proveedores, "prov"),
             "nombre": nombre,
-            "contacto": (p.get("contacto") or "").strip(),
-            "telefono": (p.get("telefono") or "").strip(),
-            "email": (p.get("email") or "").strip(),
-            "rubro": (p.get("rubro") or "").strip(),
+            "contacto": contacto,
+            "telefono": telefono,
+            "email": email,
+            "rubro": rubro,
         }
         proveedores.insert(0, objetivo)
     ok = _guardar_proveedores(proveedores)

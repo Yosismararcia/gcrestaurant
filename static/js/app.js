@@ -85,14 +85,17 @@
     const s = ESTADO.sesion;
     const chip = $("#userChip");
     const btn = $("#btnIngresar");
+    const btnAdmin = $("#btnVolverAdmin");
     if (s && s.autenticado) {
       $("#userNombre").textContent = s.nombre || s.usuario;
       $("#userCedula").textContent = s.rol === "admin" ? "Administrador" : ("Cédula " + (s.cedula || "—"));
       chip.hidden = false;
       btn.hidden = true;
+      if (btnAdmin) btnAdmin.hidden = s.rol !== "admin";
     } else {
       chip.hidden = true;
       btn.hidden = false;
+      if (btnAdmin) btnAdmin.hidden = true;
     }
   }
 
@@ -425,6 +428,7 @@
     msg.hidden = true;
     const texto = $("#inComentario").value.trim();
     if (!texto) { msg.textContent = "Escribe tu comentario."; msg.hidden = false; msg.className = "auth__msg auth__msg--err"; return; }
+    if (texto.length > 500) { msg.textContent = "El comentario no puede superar los 500 caracteres."; msg.hidden = false; msg.className = "auth__msg auth__msg--err"; return; }
     try {
       const res = await fetch("/api/comentario", {
         method: "POST",
@@ -722,6 +726,8 @@
     $("#btnSalir").addEventListener("click", () => {
       if (window.GCAuth) window.GCAuth.cerrarSesion();
     });
+    const btnVolverAdmin = $("#btnVolverAdmin");
+    if (btnVolverAdmin) btnVolverAdmin.addEventListener("click", () => { window.location.href = "/admin"; });
     $("#btnCerrarCarrito").addEventListener("click", cierreCarrito);
     $("#btnConfirmarPedido").addEventListener("click", confirmarPedido);
     $("#btnCerrarModal").addEventListener("click", cerrarModal);
